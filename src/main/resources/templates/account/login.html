@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link th:href="@{/css/login.css}" rel="stylesheet" />
+    <link th:href="@{/css/bootstrap/bootstrap.min.css}"  rel="stylesheet" />
+    <link th:href="@{/css/bootstrap/bootstrap-social.css}"  rel="stylesheet" />
+    <link th:href="@{/css/font-awesome/all.min.css}"  rel="stylesheet" />
+    <script type="text/javascript" th:src="@{/js/bootstrap/bootstrap.bundle.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/font-awesome/all.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery/jquery-3.7.1.min.js}"></script>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+</head>
+
+<body class="text-center bg-light">
+    <div class="form-login">
+        <form action="" method="">
+            <img class="mb-4" src="/img/camera_logo.png" alt="" width="150" height="150">
+            <h1 class="h3 mb-3 fw-bolder">VINCAMO</h1>
+
+            <p class="text text-normal">New user?
+            <span>
+                <a href="#" class="text text-links">Create an account</a>
+            </span>
+
+            <div class="form-floating">
+                <input type="text" class="form-control" id="id" placeholder="아이디 입력...">
+                <label for="id">Username or email</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="pwd" placeholder="Password">
+                <label for="pwd">Password</label>
+            </div>
+            <div class="checkbox mb-3">
+                <label>
+                    <input type="checkbox" value="remember-me" class=""> 아이디 저장
+                </label>
+                <button type="button" class="btn btn-outline-primary mx-3">아이디/비밀번호 찾기</button>
+            </div>
+
+            <button class="w-100 btn btn-lg btn-primary" type="submit">로그인</button>
+        </form>
+
+        <div class="mt-3">
+            <div class="mt-2">Social Login Button</div>
+            <a class="btn btn-block btn-social-icon btn-google mt-1">
+                <span class="fa-brands fa-google mt-1"></span>
+            </a>
+            <a class="btn btn-block btn-social-icon btn-facebook mt-1">
+                <span class="fa-brands fa-facebook mt-1"></span>
+            </a>
+            <a class="btn btn-block btn btn-warning mt-1" style="color: #ffffff;">
+                <span class="fa-solid fa-k"></span>
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>
