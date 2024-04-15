@@ -11,14 +11,15 @@
     <script type="text/javascript" th:src="@{/js/bootstrap/bootstrap.bundle.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/font-awesome/all.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/jquery/jquery-3.7.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/signUp.js}"></script>
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
 </head>
 
 <body class="text-center bg-light">
     <div class="form-signUp">
-        <form action="" method="">
-            <img class="mb-4" src="/img/camera_logo.png" alt="" width="150" height="150">
+        <form class="signUp-Validation" action="#" th:action="@{/signUp}" th:object="${signUpForm}" method="post" novalidate>
+            <img class="mb-4" src="/images/camera_logo.png" alt="" width="150" height="150">
             <h1 class="h3 mb-3 fw-bolder">VIN CAMO</h1>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -26,16 +27,22 @@
             </div>
 
             <div class="form-floating mt-3">
-                <input type="text" class="form-control" id="id" placeholder="아이디 입력...">
-                <label for="id">Username</label>
+                <input th:field="*{nickName}" required minlength="3" maxlength="20" type="text" class="form-control" id="nickName" placeholder="아이디 입력...">
+                <label for="nickName">Nickname</label>
+                <small class = "invalid-feedback">닉네임을 입력해주세요</small>
+                <small th:if="${#fields.hasErrors('nickName')}" th:errors="*{nickName}" class="text-danger">nickName error</small>
             </div>
             <div class="form-floating">
-                <input type="text" class="form-control" id="email" placeholder="이메일 입력...">
-                <label for="id">Email</label>
+                <input th:field="*{email}" required type="email" class="form-control" id="email" placeholder="이메일 입력...">
+                <label for="email">Email</label>
+                <small class = "invalid-feedback">이메일을 입력해주세요</small>
+                <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger">email error</small>
             </div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="pwd" placeholder="Password">
+                <input th:field="*{password}" required minlength="6" maxlength="16" type="password" class="form-control" id="pwd" placeholder="Password">
                 <label for="pwd">Password</label>
+                <small class = "invalid-feedback">패스워드를 입력해주세요</small>
+                <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger">password error</small>
             </div>
 
             <button class="w-100 btn btn-lg btn-primary" type="submit">회원가입</button>
