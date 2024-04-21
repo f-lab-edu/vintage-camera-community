@@ -1,47 +1,40 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
+<div th:replace="fragments.html :: head"></div>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
     <link th:href="@{/css/signUp.css}" rel="stylesheet" />
-    <link th:href="@{/css/bootstrap/bootstrap.min.css}"  rel="stylesheet" />
-    <link th:href="@{/css/bootstrap/bootstrap-social.css}"  rel="stylesheet" />
-    <link th:href="@{/css/font-awesome/all.min.css}"  rel="stylesheet" />
-    <script type="text/javascript" th:src="@{/js/bootstrap/bootstrap.bundle.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/font-awesome/all.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/jquery/jquery-3.7.1.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/signUp.js}"></script>
-    <link rel="shortcut icon" href="#">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+    <title></title>
 </head>
 
+
 <body class="text-center bg-light">
+
     <div class="form-signUp">
-        <form class="signUp-Validation" action="#" th:action="@{/signUp}" th:object="${signUpForm}" method="post" novalidate>
+        <form class="signUp-Validation" action="#" th:action="@{/api/account/signUp}" th:object="${signUpForm}" method="post" novalidate>
             <img class="mb-4" src="/images/camera_logo.png" alt="" width="150" height="150">
             <h1 class="h3 mb-3 fw-bolder">VIN CAMO</h1>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button class="btn btn-sm btn-outline-secondary me-md-2" type="button">로그인</button>
+                <button class="btn btn-sm btn-outline-secondary me-md-2" type="button" th:onclick="|location.href='@{/login}'|">로그인</button>
             </div>
 
             <div class="form-floating mt-3">
                 <input th:field="*{nickName}" required minlength="3" maxlength="20" type="text" class="form-control" id="nickName" placeholder="아이디 입력...">
                 <label for="nickName">Nickname</label>
-                <small class = "invalid-feedback">닉네임을 입력해주세요</small>
+                <small class = "invalid-feedback" id="nickNameError">닉네임을 입력해주세요</small>
                 <small th:if="${#fields.hasErrors('nickName')}" th:errors="*{nickName}" class="text-danger">nickName error</small>
             </div>
             <div class="form-floating">
                 <input th:field="*{email}" required type="email" class="form-control" id="email" placeholder="이메일 입력...">
                 <label for="email">Email</label>
-                <small class = "invalid-feedback">이메일을 입력해주세요</small>
+                <small class = "invalid-feedback" id="emailError">이메일을 입력해주세요</small>
                 <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger">email error</small>
             </div>
             <div class="form-floating">
-                <input th:field="*{password}" required minlength="6" maxlength="16" type="password" class="form-control" id="pwd" placeholder="Password">
-                <label for="pwd">Password</label>
-                <small class = "invalid-feedback">패스워드를 입력해주세요</small>
+                <input th:field="*{password}" required minlength="6" maxlength="16" type="password" class="form-control" id="password" placeholder="Password">
+                <label for="password">Password</label>
+                <small class = "invalid-feedback" id="passwordError">패스워드를 입력해주세요</small>
                 <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger">password error</small>
             </div>
 
@@ -62,5 +55,6 @@
         </div>
 
     </div>
+    <script th:replace="fragments.html :: signUpJS"></script>
 </body>
 </html>

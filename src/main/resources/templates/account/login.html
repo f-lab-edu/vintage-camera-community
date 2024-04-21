@@ -1,38 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
+<div th:replace="fragments.html :: head"></div>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
     <link th:href="@{/css/login.css}" rel="stylesheet" />
-    <link th:href="@{/css/bootstrap/bootstrap.min.css}"  rel="stylesheet" />
-    <link th:href="@{/css/bootstrap/bootstrap-social.css}"  rel="stylesheet" />
-    <link th:href="@{/css/font-awesome/all.min.css}"  rel="stylesheet" />
-    <script type="text/javascript" th:src="@{/js/bootstrap/bootstrap.bundle.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/font-awesome/all.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/jquery/jquery-3.7.1.min.js}"></script>
-    <link rel="shortcut icon" href="#">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+    <title></title>
 </head>
 
 <body class="text-center bg-light">
+
     <div class="form-login">
-        <form action="" method="">
+        <form action="" th:action="@{/login}" method="post" novalidate>
             <img class="mb-4" src="/images/camera_logo.png" alt="" width="150" height="150">
             <h1 class="h3 mb-3 fw-bolder">VINCAMO</h1>
 
             <p class="text text-normal">New user?
             <span>
-                <a href="#" class="text text-links">Create an account</a>
+                <a href="#" class="text text-links" th:onclick="|location.href='@{/signUp}'|">Create an account</a>
             </span>
 
             <div class="form-floating">
-                <input type="text" class="form-control" id="id" placeholder="아이디 입력...">
-                <label for="id">Username or email</label>
+                <input type="text" class="form-control" id="nickName" placeholder="아이디 입력...">
+                <label for="nickName">Username or email</label>
             </div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="pwd" placeholder="Password">
-                <label for="pwd">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Password">
+                <label for="password">Password</label>
             </div>
             <div class="checkbox mb-3">
                 <label>

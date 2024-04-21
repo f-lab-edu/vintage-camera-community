@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.4'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id "com.github.node-gradle.node" version "3.5.0"
 }
 
 group = 'com.zerozone'
@@ -21,20 +22,48 @@ repositories {
 	mavenCentral()
 }
 
+node {
+	download = true
+	version = "16.14.0"
+	npmVersion = ""
+	yarnVersion = ""
+	distBaseUrl = "https://nodejs.org/dist"
+	allowInsecureProtocol = null
+	npmInstallCommand = "install"
+	workDir = file("${project.projectDir}/.gradle/nodejs")
+	npmWorkDir = file("${project.projectDir}/.gradle/npm")
+	yarnWorkDir = file("${project.projectDir}/.gradle/yarn")
+	nodeProjectDir = file("${project.projectDir}/src/main/resources/static")
+	nodeProxySettings = ProxySettings.SMART
+}
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// View Template Engine
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+	//Web
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	//Persistence
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	// LomBok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// Dev
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	//Test Implementation
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
@@ -43,3 +72,5 @@ tasks.named('test') {
 	useJUnitPlatform()
 	jvmArgs '-Xshare:off' // JVM 아규먼트 설정
 }
+
+processResources.dependsOn('npmInstall')
