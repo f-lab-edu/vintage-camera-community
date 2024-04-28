@@ -40,13 +40,6 @@ public class AccountApiController {
 
     @PostMapping("/signUp")
     public ResponseEntity<?>  signUpFormSubmit(@Valid SignUpForm signUpForm, BindingResult result , HttpServletRequest request, HttpServletResponse response){
-        if (result.hasErrors()) {
-            Map<String, String> errors = result.getFieldErrors().stream()
-                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-            logger.debug("signUpFormSubmit Error " +errors );
-            return ResponseEntity.badRequest().body(Collections.singletonMap("errors", errors));
-        }
-
         Account account = accountService.newAccountProcess(signUpForm);
         accountService.login(account, request, response);
 
