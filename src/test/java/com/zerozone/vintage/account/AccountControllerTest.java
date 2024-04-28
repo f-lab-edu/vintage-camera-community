@@ -4,12 +4,14 @@ import com.zerozone.vintage.domain.Account;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,6 +41,8 @@ public class AccountControllerTest {
     @Autowired private AccountRepository accountRepository;
     @MockBean
     JavaMailSender javaMailSender;
+
+
 
     @DisplayName("회원 가입 화면 보이는지 테스트")
     @Test
@@ -82,12 +86,38 @@ public class AccountControllerTest {
 
     }
 
-    @DisplayName("인증 메일 입력값 오류")
     @Test
-    void checkEmailTokenWrongInput() throws Exception{
+    @DisplayName("인증 메일 입력값 오류")
+    void checkEmailTokenWrongInput() throws Exception {
         mockMvc.perform(get("/api/account/checkEmailToken")
-                        .param("token", "asdxcqwqrdvxvsdv"))
-                .andExpect(status().isBadRequest());
+                        .param("token", "asdxcqwqrdvxvsdv")
+                        .param("email", "wrongTestMail@test.com"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("잘못된 이메일입니다."));
+    }
+
+    @Test
+    @DisplayName("인증 토큰 입력값 오류")
+    void checkEmailTokenInvalidToken() throws Exception {
+
+        Account account = Account.builder()
+                .email("00zero0zone00@gmail.com")
+                .password("testpassword00!")
+                .nickname("zerozone")
+                .build();
+        account.generateEmailCheckToken();
+        accountRepository.save(account);
+
+        String validEmail = "00zero0zone00@gmail.com";
+        String invalidToken = "asdasdasdasdxxx";
+
+        mockMvc.perform(get("/api/account/checkEmailToken")
+                        .param("token", "asdasdasdasdxxx")
+                        .param("email", validEmail))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("잘못된 토근입니다."));
     }
 
     @DisplayName("인증 메일 입력값 정상")
