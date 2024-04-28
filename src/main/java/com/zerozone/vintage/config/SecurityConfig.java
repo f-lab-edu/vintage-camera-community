@@ -25,9 +25,8 @@ public class SecurityConfig{
                 .authorizeHttpRequests((authorizeRequests) ->
                      authorizeRequests
                          .requestMatchers("/signUp","/api/account/signUp",
-                           "/checkEmailToken", "/checkedEmail"
+                           "/checkEmailToken", "/checkedEmail", "/api/account/checkEmailToken"
                          ).permitAll()
-                         .requestMatchers("/login").permitAll()
                          .requestMatchers("/").permitAll()
                          .requestMatchers("/favicon.ico").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능

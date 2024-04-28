@@ -85,12 +85,9 @@ public class AccountControllerTest {
     @DisplayName("인증 메일 입력값 오류")
     @Test
     void checkEmailTokenWrongInput() throws Exception{
-        mockMvc.perform(get("/checkEmailToken")
+        mockMvc.perform(get("/api/account/checkEmailToken")
                         .param("token", "asdxcqwqrdvxvsdv"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("error"))
-                .andExpect(view().name("account/checkedEmail"))
-                .andExpect(unauthenticated());  //이메일 인증 되지 않음
+                .andExpect(status().isBadRequest());
     }
 
     @DisplayName("인증 메일 입력값 정상")
@@ -104,13 +101,12 @@ public class AccountControllerTest {
         Account newAccount = accountRepository.save(account);
         newAccount.generateEmailCheckToken();
 
-        mockMvc.perform(get("/checkEmailToken")
+        mockMvc.perform(get("/api/account/checkEmailToken")
                         .param("token", newAccount.getEmailCheckToken())
                         .param("email", newAccount.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeDoesNotExist("error"))
-                .andExpect(model().attributeExists("nickName"))
-                .andExpect(view().name("account/checkedEmail"))
+                .andExpect(jsonPath("$.nickName").value("zerozone"))
+                .andExpect(jsonPath("$.error").doesNotExist())
                 .andExpect(authenticated().withUsername("zerozone"));
 
     }

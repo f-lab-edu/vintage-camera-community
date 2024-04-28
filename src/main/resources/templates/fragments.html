@@ -130,3 +130,36 @@
 
 
 </script>
+
+
+<!-- TODO 로컬 테스트할 때 주소로 직접 입력해서 들어오는 부분인데 생각 좀 해보기. -->
+<script th:fragment="emailTokenJS">
+    $(document).ready(function() {
+
+        // 이메일 토큰 검증
+        function verifyEmailToken(token, email) {
+            $.ajax({
+                url: '/api/account/checkEmailToken',
+                type: 'GET',
+                data: { token: token, email: email },
+                success: function(response) {
+                    // 성공 시 사용자를 특정 페이지로 리디렉션
+                    window.location.href = '/account/checked-email'; // 성공 시 이동할 URL
+                },
+                error: function(xhr) {
+                    $('#successAlert').hide();
+                    $('#errorAlert').text(xhr.responseJSON.error).show();
+                }
+            });
+        }
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var token = urlParams.get('token');
+        var email = urlParams.get('email');
+
+        // 토큰과 이메일 파라미터가 모두 존재할 경우에만 함수 실행
+        if (token && email) {
+            verifyEmailToken(token, email);
+        }
+    });
+</script>

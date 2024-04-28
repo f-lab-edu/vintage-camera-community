@@ -38,12 +38,15 @@ public class Account {
 
     private String url;
 
+    private LocalDateTime emailCheckTokenGeneratedAt; //1시간 체크용
+
     @Lob @Basic(fetch = FetchType.EAGER)
     private String profileImage;
 
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
     }
 
     public void completeSignUp() {
@@ -53,6 +56,10 @@ public class Account {
 
     public boolean isValidToken(String token) {
         return this.emailCheckToken.equals(token);
+    }
+
+    public boolean canSendConfirmEmail() {
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
 }
 

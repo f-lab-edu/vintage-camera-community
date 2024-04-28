@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body class="bg-light">
+
+<div th:replace="fragments.html :: mainNav"></div>
+<!--
+<div class="py-5 text-center" th:if="${error != null}"  id="messageArea">
+    <p class="lead">빈카모 회원 가입</p>
+    <div class="alert alert-danger" role="alert" style="display: none;" id="errorAlert"></div>
+    <div class="alert alert-success" role="alert" style="display: none;" id="successAlert"></div>
+    <div  class="alert alert-danger" role="alert" th:text="${error}"></div>
+    <p class="lead" th:text="${email}">test@email.com</p>
+</div>
+
+<div class="py-5 text-center" th:if="${error == null}">
+    <p class="lead">빈카모 가입</p>
+    <h2>
+        빈카모 서비스를 사용할려면 인증 이메일을 확인해주세요.
+    </h2>
+    <small th:text="${email}">test@email.com</small>
+    <br><br>
+    <a class="btn btn-outline-info" th:href="@{/resendConfirmEmail}">인증 이메일 재전송</a>
+</div>-->
+
+<div class="py-5 text-center" id="messageArea">
+    <p class="lead">빈카모 회원 가입</p>
+    <div class="alert alert-danger" role="alert" style="display: none;" id="errorAlert"></div>
+    <div class="alert alert-success" role="alert" style="display: none;" id="successAlert"></div>
+    <p class="lead" id="emailDisplay" th:text="${email}"></p>
+    <h2 id="initialMessage">빈카모 서비스를 사용하려면 인증 이메일을 확인해주세요.</h2>
+    <a class="btn btn-outline-info" href="#" id="resendEmailButton">인증 이메일 재전송</a>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        // 페이지 로드 시 이메일 확인
+        function checkEmail() {
+            $.ajax({
+                url: '/checkEmail', // API 경로
+                type: 'GET',
+                success: function(response) {
+                    $('#emailDisplay').text(response.email); // 이메일 주소 업데이트
+                    $('#errorAlert').hide();
+                    $('#successAlert').hide();
+                },
+                error: function(xhr) {
+                    $('#successAlert').hide();
+                    $('#errorAlert').show().text(xhr.responseJSON.error);
+                }
+            });
+        }
+        checkEmail();
+
+        //재전송
+        $("#resendEmailButton").click(function(e) {
+            e.preventDefault();
+            var email = $('#emailDisplay').text();
+            $.ajax({
+                url: '/api/account/resendConfirmEmail',
+                type: 'GET',
+                data: { email: email }, // 이메일 주소 전송
+                success: function(response) {
+                    $('#initialMessage').hide();
+                    $('#errorAlert').hide();
+                    $('#successAlert').text(response.message).show();
+                },
+                error: function(xhr) {
+                    $('#successAlert').hide();
+                    $('#errorAlert').text(xhr.responseJSON.error).show();
+                }
+            });
+        });
+
+        // 이메일 토큰 검증
+        function verifyEmailToken(token, email) {
+            $.ajax({
+                url: '/api/account/checkEmailToken',
+                type: 'GET',
+                data: { token: token, email: email },
+                success: function(response) {
+                    // 성공 시 사용자를 특정 페이지로 리디렉션
+                    window.location.href = '/account/checked-email'; // 성공 시 이동할 URL
+                },
+                error: function(xhr) {
+                    $('#successAlert').hide();
+                    $('#errorAlert').text(xhr.responseJSON.error).show();
+                }
+            });
+        }
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var token = urlParams.get('token');
+        var email = urlParams.get('email');
+
+        // 토큰과 이메일 파라미터가 모두 존재할 경우에만 함수 실행
+        if (token && email) {
+            verifyEmailToken(token, email);
+        }
+    });
+</script>
+
+</body>
+</html>

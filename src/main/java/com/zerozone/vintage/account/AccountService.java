@@ -4,6 +4,7 @@ import com.zerozone.vintage.domain.Account;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,11 +50,11 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    private void sendSignUpConfirmEmail(Account newAccount) {
+    public void sendSignUpConfirmEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("빈카모 회원 가입 성공하셨습니다.");
-        mailMessage.setText("/checkEmailToken?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
+        mailMessage.setSubject("빈카모 회원 가입 성공 축하 드립니다.");
+        mailMessage.setText("/api/account/checkEmailToken?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
 
         javaMailSender.send(mailMessage);
     }
