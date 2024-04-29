@@ -40,8 +40,7 @@ public class Account {
 
     private LocalDateTime emailCheckTokenGeneratedAt; //1시간 체크용
 
-    @Lob @Basic(fetch = FetchType.EAGER)
-    private String profileImage;
+    private String profileImageUrl;
 
 
     public void generateEmailCheckToken() {
