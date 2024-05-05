@@ -66,6 +66,9 @@ dependencies {
 	//Test Implementation
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'	//Swagger
 }
 
 tasks.named('test') {

@@ -40,7 +40,7 @@
         // 페이지 로드 시 이메일 확인
         function checkEmail() {
             $.ajax({
-                url: '/checkEmail', // API 경로
+                url: '/check-email', // API 경로
                 type: 'GET',
                 success: function(response) {
                     $('#emailDisplay').text(response.email); // 이메일 주소 업데이트
@@ -60,7 +60,7 @@
             e.preventDefault();
             var email = $('#emailDisplay').text();
             $.ajax({
-                url: '/api/account/resendConfirmEmail',
+                url: '/api/account/resend-confirm-email',
                 type: 'GET',
                 data: { email: email }, // 이메일 주소 전송
                 success: function(response) {
@@ -78,7 +78,7 @@
         // 이메일 토큰 검증
         function verifyEmailToken(token, email) {
             $.ajax({
-                url: '/api/account/checkEmailToken',
+                url: '/api/account/email-verification',
                 type: 'GET',
                 data: { token: token, email: email },
                 success: function(response) {

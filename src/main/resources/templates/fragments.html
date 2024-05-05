@@ -32,7 +32,7 @@
                     <a class="nav-link" th:href="@{/login}">로그인</a>
                 </li>
                 <li class="nav-item" sec:authorize="!isAuthenticated()">
-                    <a class="nav-link" th:href="@{/signUp}">가입</a>
+                    <a class="nav-link" th:href="@{/register}">가입</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" th:href="@{/notifications}">
@@ -69,7 +69,7 @@
 
 
 
-<script type="application/javascript" th:fragment="signUpJS">
+<script type="application/javascript" th:fragment="registerJS">
     (function () {
         'use strict';
 
@@ -139,7 +139,7 @@
         // 이메일 토큰 검증
         function verifyEmailToken(token, email) {
             $.ajax({
-                url: '/api/account/checkEmailToken',
+                url: '/api/account/email-verification',
                 type: 'GET',
                 data: { token: token, email: email },
                 success: function(response) {

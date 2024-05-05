@@ -27,8 +27,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
-    private final SecurityContextHolderStrategy securityContextHolderStrategy;
-    private final SecurityContextRepository securityContextRepository;
+
 
     public Account newAccountProcess(SignUpForm signUpForm){
         Account newAccount = saveNewAccount(signUpForm);
@@ -54,20 +53,9 @@ public class AccountService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());
         mailMessage.setSubject("빈카모 회원 가입 성공 축하 드립니다.");
-        mailMessage.setText("/api/account/checkEmailToken?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
+        mailMessage.setText("/api/account/email-verification?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
 
         javaMailSender.send(mailMessage);
     }
 
-    public void login(Account account, HttpServletRequest request, HttpServletResponse response) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                new UserAccount(account),
-                account.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
-
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-        context.setAuthentication(token);
-        securityContextHolderStrategy.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
-    }
 }

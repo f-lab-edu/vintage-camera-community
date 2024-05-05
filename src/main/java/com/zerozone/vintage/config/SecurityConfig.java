@@ -24,11 +24,15 @@ public class SecurityConfig{
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())) // CSRF 보호 활성화
                 .authorizeHttpRequests((authorizeRequests) ->
                      authorizeRequests
-                         .requestMatchers("/signUp","/api/account/signUp",
-                           "/checkEmailToken", "/checkedEmail", "/api/account/checkEmailToken"
+                         .requestMatchers("/register","/api/account/register",
+                           "/email-verification", "/api/account/email-verification", "/checked-email"
                          ).permitAll()
                          .requestMatchers("/").permitAll()
                          .requestMatchers("/favicon.ico").permitAll()
+                         .requestMatchers(// Swagger 허용 URL
+                                         "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
+                                         "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**",
+                                         "/webjars/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능
                 )
                 .formLogin((formLogin) ->{

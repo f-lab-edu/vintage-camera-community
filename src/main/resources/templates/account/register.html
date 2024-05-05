@@ -3,7 +3,7 @@
 
 <div th:replace="fragments.html :: head"></div>
 <head>
-    <link th:href="@{/css/signUp.css}" rel="stylesheet" />
+    <link th:href="@{/css/register.css}" rel="stylesheet" />
     <title></title>
 </head>
 
@@ -11,7 +11,7 @@
 <body class="text-center bg-light">
 
     <div class="form-signUp">
-        <form class="signUp-Validation" action="#" th:action="@{/api/account/signUp}" th:object="${signUpForm}" method="post" novalidate>
+        <form class="signUp-Validation" action="#" th:action="@{/api/account/register}" th:object="${signUpForm}" method="post" novalidate>
             <img class="mb-4" src="/images/camera_logo.png" alt="" width="150" height="150">
             <h1 class="h3 mb-3 fw-bolder">VIN CAMO</h1>
 
@@ -55,6 +55,6 @@
         </div>
 
     </div>
-    <script th:replace="fragments.html :: signUpJS"></script>
+    <script th:replace="fragments.html :: registerJS"></script>
 </body>
 </html>
