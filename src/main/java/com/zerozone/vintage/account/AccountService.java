@@ -1,6 +1,7 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.settings.Profile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,15 @@ public class AccountService {
         mailMessage.setText("/api/account/email-verification?token=" + newAccount.getEmailCheckToken() + "&email=" + newAccount.getEmail());
 
         javaMailSender.send(mailMessage);
+    }
+
+    public void updateProfile(Account account, Profile profile) {
+        account.setUrl(profile.getUrl());
+        account.setOccupation(profile.getOccupation());
+        account.setLocation(profile.getLocation());
+        account.setBio(profile.getBio());
+        account.setProfileImageUrl(profile.getProfileImageUrl());
+        accountRepository.save(account);
     }
 
 }

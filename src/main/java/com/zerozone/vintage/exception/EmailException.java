@@ -1,6 +1,6 @@
 package com.zerozone.vintage.exception;
 
-public class ControllerException {
+public class EmailException {
     public static class InvalidEmailException extends RuntimeException {
         public InvalidEmailException(String message) {
             super(message);

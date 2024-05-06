@@ -1,40 +1,30 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.exception.ControllerException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.FieldError;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import com.zerozone.vintage.exception.ControllerException.InvalidTokenException;
-import com.zerozone.vintage.exception.ControllerException.InvalidEmailException;
-import com.zerozone.vintage.exception.ControllerException.EmailSendException;
+import com.zerozone.vintage.exception.EmailException.InvalidTokenException;
+import com.zerozone.vintage.exception.EmailException.InvalidEmailException;
+import com.zerozone.vintage.exception.EmailException.EmailSendException;
 
-import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/account")

@@ -13,6 +13,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import static org.springframework.http.HttpMethod.GET;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig{
@@ -33,6 +35,7 @@ public class SecurityConfig{
                                          "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                          "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**",
                                          "/webjars/**", "/swagger-ui.html").permitAll()
+                         .requestMatchers(GET, "/profile/*").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능
                 )
                 .formLogin((formLogin) ->{
