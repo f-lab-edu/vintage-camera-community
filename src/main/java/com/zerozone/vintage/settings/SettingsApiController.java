@@ -4,6 +4,7 @@ import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.CheckedUser;
 import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.dto.CustomResDto;
+import com.zerozone.vintage.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +37,7 @@ public class SettingsApiController {
         Map<String, Object> responseMap = new HashMap<>();
         if(bindingResult.hasErrors()){
             //TODO 요청경로나 메소드명 파라매터 추가로 넘겨서 어디서 에러났는지 문구 지정.
-            throw new ValidationException(bindingResult);
+            throw new CustomException("프로필 업데이트 유효성 검사 실패", bindingResult);
         }
 
         Profile updatedProfile = accountService.updateProfile(account, profile);
