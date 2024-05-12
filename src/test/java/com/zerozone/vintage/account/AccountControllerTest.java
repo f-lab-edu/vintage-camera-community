@@ -92,12 +92,15 @@ public class AccountControllerTest {
     @Test
     @DisplayName("인증 메일 입력값 오류")
     void checkEmailTokenWrongInput() throws Exception {
+        String requestBody = "{\"token\":\"asdxcqwqrdvxvsdv\", \"email\":\"wrongTestMail@test.com\"}";
+
         mockMvc.perform(post("/api/account/email-verification")
-                        .param("token", "asdxcqwqrdvxvsdv")
-                        .param("email", "wrongTestMail@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.error").value("잘못된 이메일입니다."));
+                .andExpect(jsonPath("$.message").value("잘못된 이메일입니다."));
     }
 
     @Test
@@ -114,13 +117,15 @@ public class AccountControllerTest {
 
         String validEmail = "00zero0zone00@gmail.com";
         String invalidToken = "asdasdasdasdxxx";
+        String requestBody = "{\"token\":\"" + invalidToken + "\", \"email\":\"" + validEmail + "\"}";
 
         mockMvc.perform(post("/api/account/email-verification")
-                        .param("token", "asdasdasdasdxxx")
-                        .param("email", validEmail))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.error").value("잘못된 토큰입니다."));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("잘못된 토큰입니다."));
     }
 
     @DisplayName("인증 메일 입력값 정상")
@@ -134,13 +139,17 @@ public class AccountControllerTest {
         Account newAccount = accountRepository.save(account);
         newAccount.generateEmailCheckToken();
 
+        String requestBody = "{\"token\":\"" + newAccount.getEmailCheckToken() + "\", \"email\":\"" + newAccount.getEmail() + "\"}";
+
         mockMvc.perform(post("/api/account/email-verification")
-                        .param("token", newAccount.getEmailCheckToken())
-                        .param("email", newAccount.getEmail()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.nickName").value("zerozone"))
-                .andExpect(jsonPath("$.error").doesNotExist())
-                .andExpect(authenticated().withUsername("zerozone"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.code").value(1))
+                .andExpect(jsonPath("$.message").value("이메일 인증 성공"))
+                .andExpect(jsonPath("$.data.nickName").value("zerozone"));
 
     }
 
