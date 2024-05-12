@@ -52,7 +52,7 @@ public class AccountApiController {
     @ApiResponse(responseCode = "200", description = "계정 생성 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Map<String, Object>>> signUpFormSubmit(@Valid SignUpForm signUpForm, HttpServletRequest request, HttpServletResponse response){
         Account account = accountService.newAccountProcess(signUpForm);
-        login(account, request, response);
+        AuthenticationManager.login(account, request, response);
 
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("accountId", account.getId());
@@ -74,7 +74,7 @@ public class AccountApiController {
         }
 
         account.completeSignUp();
-        login(account, request, response);
+        AuthenticationManager.login(account, request, response);
         responseMap.put("nickName", account.getNickname());
         return ResponseEntity.ok(new CustomResDto<>(1, "이메일 인증 성공", responseMap));
     }
@@ -85,7 +85,6 @@ public class AccountApiController {
     @ApiResponse(responseCode = "200", description = "인증 이메일 재전송 요청 결과", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<String>> resendConfirmEmail(@RequestBody EmailForm request) {
         Optional<Account> accountOptional = accountRepository.findByEmail(request.getEmail());
-        Map<String, Object> responseMap = new HashMap<>();
 
         Account account = accountOptional.orElseThrow(() -> new CustomException("잘못된 이메일입니다."));
 
@@ -93,18 +92,5 @@ public class AccountApiController {
         return ResponseEntity.ok(new CustomResDto<>(1, "인증 이메일을 다시 보냈습니다.", "성공"));
     }
 
-
-    //로그인
-    private void login(Account account, HttpServletRequest request, HttpServletResponse response) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                new UserAccount(account),
-                account.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
-
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-        context.setAuthentication(token);
-        securityContextHolderStrategy.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
-    }
 
 }

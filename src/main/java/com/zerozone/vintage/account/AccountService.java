@@ -3,6 +3,8 @@ package com.zerozone.vintage.account;
 import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.settings.Profile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
@@ -127,6 +129,11 @@ public class AccountService {
 
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    public void updateNickname(Account account, String nickname) {
+        account.setNickname(nickname);
         accountRepository.save(account);
     }
 }

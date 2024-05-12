@@ -46,6 +46,11 @@ public class SettingsController {
         return "/settings/password";
     }
 
-
+    @GetMapping("/account")
+    public String updateAccountForm(@CheckedUser Account account, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(modelMapper.map(account, NicknameForm.class));
+        return "/settings/account";
+    }
 
 }
