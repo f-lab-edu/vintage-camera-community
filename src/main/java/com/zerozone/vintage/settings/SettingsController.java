@@ -37,6 +37,13 @@ public class SettingsController {
         return "settings/profile";
     }
 
+    @GetMapping("/password")
+    public String passwordUpdateForm(@CheckedUser Account account, Model model){
+        model.addAttribute(account);
+        model.addAttribute(new PasswordForm());
+        return "/settings/password";
+    }
+
 
 
 }

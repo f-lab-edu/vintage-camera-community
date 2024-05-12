@@ -11,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -35,6 +38,8 @@ class SettingsControllerTest {
     AccountRepository accountRepository;
     @Autowired
     AccountService accountService;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void beforeEach() {
@@ -95,8 +100,49 @@ class SettingsControllerTest {
         Account account = accountOptional.get();
         //업데이트 되지 않았어야 한다.
         assertNull(account.getBio());
-
     }
+
+    @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @DisplayName("패스워드 화면 접근")
+    @Test
+    void updatePassword_view() throws Exception {
+        mockMvc.perform(get("/settings/password"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("passwordForm"));
+    }
+
+    @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @DisplayName("패스워드 변경값 정상")
+    @Test
+    void updatePassword_success() throws Exception {
+        String passwordJson = "{\"newPassword\":\"test1234!\", \"newPasswordConfirm\":\"test1234!\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/settings/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passwordJson)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk());
+
+        Optional<Account> zerozone = accountRepository.findByNickname("zerozone");
+        assertTrue(zerozone.isPresent());
+        assertTrue(passwordEncoder.matches("test1234!", zerozone.get().getPassword()));
+    }
+
+    @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @DisplayName("패스워드 변경값 불일치")
+    @Test
+    void updatePassword_fail() throws Exception {
+        String passwordJson = "{\"newPassword\":\"test1234!\", \"newPasswordConfirm\":\"11111111\"}";
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/settings/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passwordJson)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isBadRequest());
+    }
+
+
 
 
 

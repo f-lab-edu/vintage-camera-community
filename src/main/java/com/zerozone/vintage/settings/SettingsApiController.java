@@ -15,10 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,11 +29,15 @@ public class SettingsApiController {
 
     private final AccountService accountService;
 
+    @InitBinder("passwordForm")
+    public void initBinder(WebDataBinder webDataBinder){
+        webDataBinder.addValidators(new PasswrodFormValidator());
+    }
+
     @PostMapping("/profile")
     @Operation(summary = "프로필 업데이트", description = "사용자의 프로필 정보를 업데이트.")
     @ApiResponse(responseCode = "200", description = "프로필 업데이트 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Profile>> updateProfile(@CheckedUser Account account, @RequestBody @Valid Profile profile, BindingResult bindingResult, Model model){
-        Map<String, Object> responseMap = new HashMap<>();
         if(bindingResult.hasErrors()){
             throw new CustomException("프로필 업데이트 유효성 검사 실패", bindingResult);
         }
@@ -44,6 +46,16 @@ public class SettingsApiController {
         return ResponseEntity.ok(new CustomResDto<>(1, "프로필 업데이트에 성공했습니다.", updatedProfile));
     }
 
+    @PostMapping("/password")
+    public ResponseEntity<CustomResDto<String>> updatePassword(@CheckedUser Account account, @RequestBody @Valid PasswordForm passwordForm, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new CustomException("패스워드 변경에 실패", bindingResult);
+        }
+
+        accountService.updatePassword(account, passwordForm.getNewPassword());
+        return ResponseEntity.ok(new CustomResDto<>(1, "패스워드 변경에 성공했습니다.", "성공"));
+
+    }
 
 
 }
