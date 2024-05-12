@@ -5,6 +5,7 @@ import com.zerozone.vintage.account.CheckedUser;
 import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class SettingsController {
 
     private final AccountRepository accountRepository;
+    private final ModelMapper modelMapper;
 
     @GetMapping("/personalProfile/{nickname}")
     public String viewPersonalProfile(@PathVariable String nickname, Model model, @CheckedUser Account account){
@@ -33,7 +35,7 @@ public class SettingsController {
     @GetMapping("/profile")
     public String showProfileForm(@CheckedUser Account account, Model model){
         model.addAttribute(account);
-        model.addAttribute(new Profile(account));
+        model.addAttribute(modelMapper.map(account , Profile.class));
         return "settings/profile";
     }
 

@@ -4,6 +4,7 @@ import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.settings.Profile;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -26,6 +27,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
     private final Path rootLocation = Paths.get("uploaded-profile-images"); // 이미지를 저장할 서버 내 폴더 경로 지정
 
 
@@ -73,11 +75,7 @@ public class AccountService {
            profile.setProfileImageUrl(imageName);
         }
 
-        account.setUrl(profile.getUrl());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setBio(profile.getBio());
-        account.setProfileImageUrl(profile.getProfileImageUrl());
+        modelMapper.map(profile, account);
         accountRepository.save(account);
         return profile;
     }
