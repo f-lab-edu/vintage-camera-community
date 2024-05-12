@@ -32,7 +32,7 @@
                     <a class="nav-link" th:href="@{/login}">로그인</a>
                 </li>
                 <li class="nav-item" sec:authorize="!isAuthenticated()">
-                    <a class="nav-link" th:href="@{/signUp}">가입</a>
+                    <a class="nav-link" th:href="@{/account}">가입</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" th:href="@{/notifications}">
@@ -68,8 +68,18 @@
 </nav>
 
 
+<script type="application/javascript" th:inline="javascript" th:fragment="ajax-csrf">
+    $(function() {
+        var csrfToken = /*[[${_csrf.token}]]*/ null;
+        var csrfHeader = /*[[${_csrf.headerName}]]*/ null;
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(csrfHeader, csrfToken);
+        });
+    });
+</script>
 
-<script type="application/javascript" th:fragment="signUpJS">
+
+<script type="application/javascript" th:fragment="accountJS">
     (function () {
         'use strict';
 
@@ -110,12 +120,13 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.errors) {
-                        Object.keys(data.errors).forEach(function (key) {
+                    debugger;
+                    if (data.code === 0 && data.data) {
+                        Object.keys(data.data).forEach(function (key) {
                             const inputElement = document.getElementById(key);
                             const errorElement = document.getElementById(key + 'Error');
                             if (inputElement && errorElement) {
-                                errorElement.textContent = data.errors[key];
+                                errorElement.textContent = data.data[key];
                                 errorElement.style.display = 'block';
                                 inputElement.classList.add('is-invalid');
                             }
@@ -129,4 +140,104 @@
     });
 
 
+</script>
+
+
+<!-- TODO 로컬 테스트할 때 주소로 직접 입력해서 들어오는 부분인데 생각 좀 해보기. -->
+<script th:fragment="emailTokenJS">
+    $(document).ready(function() {
+
+        // 이메일 토큰 검증
+        function verifyEmailToken(token, email) {
+            var data = JSON.stringify({ token: token, email: email });
+
+            $.ajax({
+                url: '/api/account/email-verification',
+                type: 'POST',
+                contentType: 'application/json',
+                data: data,
+                success: function(response) {
+                    if (response.code === 1) {
+                        // 성공 시 사용자를 특정 페이지로 리디렉션
+                        window.location.href = '/account/checked-email'; // 성공 시 이동할 URL
+                    } else {
+                        $('#successAlert').hide();
+                        $('#errorAlert').text(response.message).show();
+                    }
+                },
+                error: function(xhr) {
+                    $('#successAlert').hide();
+                    $('#errorAlert').text(xhr.responseJSON.message).show();
+                }
+            });
+        }
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var token = urlParams.get('token');
+        var email = urlParams.get('email');
+
+        // 토큰과 이메일 파라미터가 모두 존재할 경우에만 함수 실행
+        if (token && email) {
+            verifyEmailToken(token, email);
+        }
+    });
+</script>
+
+<div th:fragment="settings-menu (currentMenu)" class="list-group">
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'profile'}? active" href="#" th:href="@{/settings/profile}">프로필</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'password'}? active" href="#" th:href="@{/settings/password}">패스워드</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'notifications'}? active" href="#" th:href="@{/settings/notifications}">알림</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'tags'}? active" href="#" th:href="@{/settings/tags}">관심 카메라</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'zones'}? active" href="#" th:href="@{/settings/zones}">활동 지역</a>
+    <a class="list-group-item list-group-item-action list-group-item-danger" th:classappend="${currentMenu == 'account'}? active" href="#" th:href="@{/settings/account}">계정</a>
+</div>
+
+
+<script th:fragment="profileJS">
+    $(document).ready(function() {
+        $('#profileForm').submit(function(event) {
+            event.preventDefault(); // 폼 기본 제출을 방지
+
+            // 폼 데이터를 JSON 객체로 변환
+            var formData = {
+                "bio": $("#bio").val(),
+                "url": $("#url").val(),
+                "company": $("#company").val(),
+                "location": $("#location").val(),
+                "profileImageUrl": $("#profileImageUrl").val()
+            };
+
+            $.ajax({
+                url: '/api/settings/profile',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function() {
+                    if (response.code === 1) {
+                        alert('프로필 업데이트에 성공했습니다.');
+                        $("#bio").text(response.data.bio);
+                        $("#url").text(response.data.url);
+                        $("#occupation").text(response.data.occupation);
+                        $("#location").text(response.data.location);
+                        $("#profileImageUrl").attr("src", response.data.profileImageUrl);
+                    } else {
+                        alert('프로필 업데이트에 실패했습니다. 오류: ' + response.message);
+                    }
+                },
+                error: function(response) {
+                    alert('서버 오류로 프로필 업데이트에 실패했습니다.' + response.message);
+                }
+            });
+        });
+    });
+</script>
+
+<script type="application/javascript" th:inline="javascript" th:fragment="ajax-csrf-header">
+    $(function() {
+        var csrfToken = /*[[${_csrf.token}]]*/ null;
+        var csrfHeader = /*[[${_csrf.headerName}]]*/ null;
+        $(document).ajaxSend(function (e, xhr, options) {
+            xhr.setRequestHeader(csrfHeader, csrfToken);
+        });
+    });
 </script>
