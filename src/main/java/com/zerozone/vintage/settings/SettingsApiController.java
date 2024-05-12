@@ -47,6 +47,8 @@ public class SettingsApiController {
     }
 
     @PostMapping("/password")
+    @Operation(summary = "패스워드 업데이트", description = "사용자의 패스워드변경을 업데이트.")
+    @ApiResponse(responseCode = "200", description = "패스워드 변경 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<String>> updatePassword(@CheckedUser Account account, @RequestBody @Valid PasswordForm passwordForm, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new CustomException("패스워드 변경에 실패", bindingResult);
