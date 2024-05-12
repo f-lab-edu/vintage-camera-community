@@ -48,9 +48,9 @@ public class AccountControllerTest {
     @DisplayName("회원 가입 화면 보이는지 테스트")
     @Test
     void signUpForm() throws Exception{
-        mockMvc.perform(get("/register"))
+        mockMvc.perform(get("/account"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("account/register"))
+                .andExpect(view().name("account/account"))
                 .andExpect(model().attributeExists("signUpForm"))
                 .andExpect(unauthenticated());
     }
@@ -58,7 +58,7 @@ public class AccountControllerTest {
     @DisplayName("회원 가입 유효성 검사 성공")
     @Test
     public void testSignUpWithValidData() throws Exception {
-        mockMvc.perform(post("/api/account/register")
+        mockMvc.perform(post("/api/account/account")
                         .with(csrf())  // CSRF 토큰을 추가
                         .param("email", "00zero0zone00@gmail.com")  // 유효한 이메일 주소
                         .param("password", "passwrod12!")  // 유효한 비밀번호
@@ -78,7 +78,7 @@ public class AccountControllerTest {
     @DisplayName("회원 가입 입력값 오류")
     @Test
     void signUpSubmitWrongInput() throws Exception{
-        mockMvc.perform(post("/api/account/register")
+        mockMvc.perform(post("/api/account/account")
                         .param("nickName","zerozone**") //특수문자가 들어간 유효하지 닉네임
                         .param("email","00zero0zone00@gmail.com")
                         .param("password","passwrod")   // 특수문주랑 숫자가 빠진 유효하지 않는 패스워드
@@ -92,7 +92,7 @@ public class AccountControllerTest {
     @Test
     @DisplayName("인증 메일 입력값 오류")
     void checkEmailTokenWrongInput() throws Exception {
-        mockMvc.perform(get("/api/account/email-verification")
+        mockMvc.perform(post("/api/account/email-verification")
                         .param("token", "asdxcqwqrdvxvsdv")
                         .param("email", "wrongTestMail@test.com"))
                 .andExpect(status().isBadRequest())
@@ -115,7 +115,7 @@ public class AccountControllerTest {
         String validEmail = "00zero0zone00@gmail.com";
         String invalidToken = "asdasdasdasdxxx";
 
-        mockMvc.perform(get("/api/account/email-verification")
+        mockMvc.perform(post("/api/account/email-verification")
                         .param("token", "asdasdasdasdxxx")
                         .param("email", validEmail))
                 .andExpect(status().isBadRequest())
@@ -134,11 +134,11 @@ public class AccountControllerTest {
         Account newAccount = accountRepository.save(account);
         newAccount.generateEmailCheckToken();
 
-        mockMvc.perform(get("/api/account/email-verification")
+        mockMvc.perform(post("/api/account/email-verification")
                         .param("token", newAccount.getEmailCheckToken())
                         .param("email", newAccount.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nickName").value("zerozone"))
+                .andExpect(jsonPath("$.data.nickName").value("zerozone"))
                 .andExpect(jsonPath("$.error").doesNotExist())
                 .andExpect(authenticated().withUsername("zerozone"));
 

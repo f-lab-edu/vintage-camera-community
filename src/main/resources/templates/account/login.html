@@ -16,8 +16,10 @@
 
             <p class="text text-normal">New user?
             <span>
-                <a href="#" class="text text-links" th:onclick="|location.href='@{/register}'|">Create an account</a>
+                <a href="#" class="text text-links" th:onclick="|location.href='@{/account}'|">Create an account</a>
             </span>
+
+            <p th:if="${param.error}" class="alert alert-danger">아이디 또는 비밀번호가 잘못되었습니다.</p>
 
             <div class="form-floating">
                 <input id="username" type="text" name="username" class="form-control"

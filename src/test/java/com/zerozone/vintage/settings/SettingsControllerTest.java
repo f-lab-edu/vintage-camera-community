@@ -77,7 +77,7 @@ class SettingsControllerTest {
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("프로필 수정 - 비정상 입력 오류")
     @Test
-    void updateProfile_error() throws Exception{
+    void updateProfileError() throws Exception{
         //긴 문장
         String bio = "나랏말싸미 듕귁에 달아문자와로 서르 사맛디 아니할쎄 이런 전차로 어린 백셩이 니르고져 홇베이셔도 마참네 제 뜨들 시러펴디 몯핧 노미하니아 내 이랄 윙하야 어엿비너겨 새로 스믈 여듫 짜랄 맹가노니사람마다 해여 수비니겨 날로 쑤메 뻔한킈 하고져 할따라미니라";
         mockMvc.perform(post("/api/settings/profile")

@@ -1,7 +1,8 @@
 package com.zerozone.vintage.handler;
 
-import com.zerozone.vintage.exception.EmailException;
-import com.zerozone.vintage.exception.ValidationException;
+import com.zerozone.vintage.dto.CustomResDto;
+import com.zerozone.vintage.exception.CustomException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.validation.FieldError;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -20,70 +19,36 @@ import java.util.stream.Collectors;
 public class ControllerExceptionHandler {
 
     /**
-    *
-    * @Valid 어노테이션이 적용된 객체에 발생한 유효성 검증 실패
-    *
-    */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        BindingResult result = ex.getBindingResult();
-        Map<String, String> errors = result.getFieldErrors().stream()
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-        log.info("Validation failed: {}", errors);
-        return ResponseEntity.badRequest().body(Collections.singletonMap("errors", errors));
-    }
-
-    /**
+     * CustomException과 MethodArgumentNotValidException 유형의 예외를 처리.
+     * 유효성 검사 결과 실패 or 사용자 정의 예외가 발생했을 때.
      *
-     * 사용자 정의 예외 중 잘못된 이메일 예외를 처리
-     *
+     * @param ex 처리할 예외 객체 (CustomException 또는 MethodArgumentNotValidException)
+     * @return CustomResDto
      */
-    @ExceptionHandler(EmailException.InvalidEmailException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidEmailException(EmailException.InvalidEmailException ex) {
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("error", ex.getMessage());
-        return ResponseEntity.badRequest().body(responseMap);
+
+    @ExceptionHandler({CustomException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<CustomResDto<?>> handleException(Exception ex) {
+        BindingResult bindingResult = null;
+
+        if (ex instanceof CustomException customException) {
+            if (customException.getBindingResult() != null) {
+                bindingResult = customException.getBindingResult();
+            } else if (customException.getErrorMap() != null) {
+                return ResponseEntity.badRequest().body(new CustomResDto<>(0, "오류 발생가 했습니다.", customException.getErrorMap()));
+            } else {
+                return ResponseEntity.badRequest().body(new CustomResDto<>(0, customException.getMessage(), null));
+            }
+        } else if (ex instanceof MethodArgumentNotValidException) {
+            bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
+        }
+
+        if (bindingResult != null) {
+            Map<String, String> errors = bindingResult.getFieldErrors().stream()
+                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (oldValue, newValue) -> oldValue));
+            return ResponseEntity.badRequest().body(new CustomResDto<>(0, "유효성 검사 실패했습니다.", errors));
+        }
+
+        return ResponseEntity.badRequest().body(new CustomResDto<>(0, "오류가 발생 했습니다.", null));
     }
-
-    /**
-     *
-     * 사용자 정의 예외 중 잘못된 토큰 예외를 처리
-     *
-     */
-    @ExceptionHandler(EmailException.InvalidTokenException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidTokenException(EmailException.InvalidTokenException ex) {
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("error", ex.getMessage());
-        return ResponseEntity.badRequest().body(responseMap);
-    }
-
-    /**
-     *
-     * 이메일 전송 실패 예외 처리
-     *
-     */
-    @ExceptionHandler(EmailException.EmailSendException.class)
-    public ResponseEntity<Map<String, String>> handleEmailSendException(EmailException.EmailSendException ex) {
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("error", ex.getMessage());
-        return ResponseEntity.badRequest().body(responseMap);
-    }
-
-    /**
-     * 새로 정의한 유효성 검사 예외를 처리
-     *
-     */
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException validationException) {
-        BindingResult result = validationException.getBindingResult();
-        Map<String, String> errors = result.getFieldErrors().stream()
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (oldValue, newValue) -> oldValue));
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("errors", errors);
-        response.put("status", "validation error");
-        return ResponseEntity.badRequest().body(response);
-    }
-
 
 }

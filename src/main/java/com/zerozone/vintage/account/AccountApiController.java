@@ -1,6 +1,12 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.dto.CustomResDto;
+import com.zerozone.vintage.exception.CustomException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +23,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import com.zerozone.vintage.exception.EmailException.InvalidTokenException;
-import com.zerozone.vintage.exception.EmailException.InvalidEmailException;
-import com.zerozone.vintage.exception.EmailException.EmailSendException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,54 +47,54 @@ public class AccountApiController {
         webDataBinder.addValidators(signUpFormValidator);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> signUpFormSubmit(@Valid SignUpForm signUpForm, HttpServletRequest request, HttpServletResponse response){
+    @PostMapping("/account")
+    @Operation(summary = "회원 가입", description = "새로운 계정을 등록하고 로그인 처리.")
+    @ApiResponse(responseCode = "200", description = "계정 생성 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
+    public ResponseEntity<CustomResDto<Map<String, Object>>> signUpFormSubmit(@Valid SignUpForm signUpForm, HttpServletRequest request, HttpServletResponse response){
         Account account = accountService.newAccountProcess(signUpForm);
         login(account, request, response);
 
         Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("message", "success");
         responseMap.put("accountId", account.getId());
-        return ResponseEntity.ok(responseMap);
+        return ResponseEntity.ok(new CustomResDto<>(1, "계정 생성에 성공했습니다.", responseMap));
     }
 
 
-    @GetMapping("/email-verification")
-    public ResponseEntity<Map<String, Object>> checkEmailToken(@RequestParam String token, @RequestParam String email, HttpServletRequest request, HttpServletResponse response) {
-        Optional<Account> accountOptional = accountRepository.findByEmail(email);
+    @PostMapping("/email-verification")
+    @Operation(summary = "이메일 인증", description = "제공된 토큰을 사용하여 이메일 인증을 수행.")
+    @ApiResponse(responseCode = "200", description = "이메일 인증 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
+    public ResponseEntity<?>checkEmailToken(@RequestBody EmailForm emailForm, HttpServletRequest request, HttpServletResponse response) {
+        Optional<Account> accountOptional = accountRepository.findByEmail(emailForm.getEmail());
         Map<String, Object> responseMap = new HashMap<>();
 
-        Account account = accountOptional.orElseThrow(() -> new InvalidEmailException("잘못된 이메일입니다."));
+        Account account = accountOptional.orElseThrow(() -> new CustomException("잘못된 이메일입니다."));
 
-        if (!account.isValidToken(token)) {
-            throw new InvalidTokenException("잘못된 토큰입니다.");
+        if (!account.isValidToken(emailForm.getToken())) {
+            throw new CustomException("잘못된 토큰입니다.");
         }
 
         account.completeSignUp();
         login(account, request, response);
-        responseMap.put("message", "success");
         responseMap.put("nickName", account.getNickname());
-        return ResponseEntity.ok(responseMap);
+        return ResponseEntity.ok(new CustomResDto<>(1, "이메일 인증 성공", responseMap));
     }
 
 
-    @GetMapping("/resend-confirm-email")
-    public ResponseEntity<Map<String, Object>> resendConfirmEmail(@RequestParam String email) {
-        Optional<Account> accountOptional = accountRepository.findByEmail(email);
-
+    @PostMapping("/resend-confirm-email")
+    @Operation(summary = "인증 이메일 재전송", description = "인증 이메일에 대한 재요청. 이메일은 1시간에 한 번만 재전송 가능.")
+    @ApiResponse(responseCode = "200", description = "인증 이메일 재전송 요청 결과", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
+    public ResponseEntity<CustomResDto<String>> resendConfirmEmail(@RequestBody EmailForm request) {
+        Optional<Account> accountOptional = accountRepository.findByEmail(request.getEmail());
         Map<String, Object> responseMap = new HashMap<>();
 
-        Account account = accountOptional.orElseThrow(() -> new InvalidEmailException("잘못된 이메일입니다."));
+        Account account = accountOptional.orElseThrow(() -> new CustomException("잘못된 이메일입니다."));
 
-        if (!account.canSendConfirmEmail()) {
-            throw new EmailSendException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
-        }
-
-        accountService.sendSignUpConfirmEmail(account);
-        responseMap.put("message", "success.");
-        return ResponseEntity.ok(responseMap);
+        accountService.sendSignUpConfirmEmail(account, "resend");
+        return ResponseEntity.ok(new CustomResDto<>(1, "인증 이메일을 다시 보냈습니다.", "성공"));
     }
 
+
+    //로그인
     private void login(Account account, HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),

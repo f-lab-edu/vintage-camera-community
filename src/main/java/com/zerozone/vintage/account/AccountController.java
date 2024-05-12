@@ -13,10 +13,10 @@ public class AccountController {
     private final AccountRepository accountRepository;
     private final AccountService accountService;
 
-    @GetMapping("/register")
+    @GetMapping("/account")
     public String signUpForm(Model model){
         model.addAttribute("signUpForm", new SignUpForm());
-        return "account/register";
+        return "account/account";
     }
 
 

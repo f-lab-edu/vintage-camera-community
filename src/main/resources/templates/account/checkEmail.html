@@ -34,6 +34,7 @@
     <a class="btn btn-outline-info" href="#" id="resendEmailButton">인증 이메일 재전송</a>
 </div>
 
+<script th:replace="fragments.html :: ajax-csrf"></script>
 <script>
     $(document).ready(function() {
 
@@ -59,31 +60,46 @@
         $("#resendEmailButton").click(function(e) {
             e.preventDefault();
             var email = $('#emailDisplay').text();
+            var data = JSON.stringify({ email: email });
+
             $.ajax({
                 url: '/api/account/resend-confirm-email',
-                type: 'GET',
-                data: { email: email }, // 이메일 주소 전송
+                type: 'POST',
+                contentType: 'application/json',
+                data: data,
                 success: function(response) {
-                    $('#initialMessage').hide();
-                    $('#errorAlert').hide();
-                    $('#successAlert').text(response.message).show();
+                    if(response.code === 1) {
+                        $('#initialMessage').hide();
+                        $('#errorAlert').hide();
+                        $('#successAlert').text(response.message).show();
+                    } else {
+                        $('#successAlert').hide();
+                        $('#errorAlert').text(response.message).show();
+                    }
                 },
                 error: function(xhr) {
                     $('#successAlert').hide();
-                    $('#errorAlert').text(xhr.responseJSON.error).show();
+                    $('#errorAlert').text(xhr.responseJSON.message).show();
                 }
             });
         });
 
         // 이메일 토큰 검증
         function verifyEmailToken(token, email) {
+            var data = JSON.stringify({ token: token, email: email });
+
             $.ajax({
                 url: '/api/account/email-verification',
-                type: 'GET',
-                data: { token: token, email: email },
+                type: 'POST',
+                contentType: 'application/json',
+                data: data,
                 success: function(response) {
-                    // 성공 시 사용자를 특정 페이지로 리디렉션
-                    window.location.href = '/account/checked-email'; // 성공 시 이동할 URL
+                    if(response.code === 1) {
+                        window.location.href = '/account/checked-email'; // 성공 시 이동할 URL
+                    } else {
+                        $('#successAlert').hide();
+                        $('#errorAlert').text(response.message).show();
+                    }
                 },
                 error: function(xhr) {
                     $('#successAlert').hide();
