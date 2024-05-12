@@ -42,6 +42,8 @@ public class Account {
 
     private String profileImageUrl;
 
+    private String profileImageName;
+
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();

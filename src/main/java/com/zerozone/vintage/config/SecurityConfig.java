@@ -54,6 +54,7 @@ public class SecurityConfig{
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers("/node_modules/**")
+                .requestMatchers("/uploaded-profile-images/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 

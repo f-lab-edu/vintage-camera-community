@@ -89,7 +89,8 @@ class SettingsControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.data.bio").value("length must be between 0 and 35"));
 
-        Optional<Account> accountOptional = accountRepository.findByEmail("00zero0zone00@gmail.com");
+        Optional<Account> accountOptional = accountRepository.findByNickname("zerozone");
+        //Optional<Account> accountOptional = accountRepository.findByEmail("00zero0zone00@gmail.com");
         assertTrue(accountOptional.isPresent());
         Account account = accountOptional.get();
         //업데이트 되지 않았어야 한다.

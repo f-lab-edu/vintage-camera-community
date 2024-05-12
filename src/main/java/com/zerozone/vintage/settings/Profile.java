@@ -21,6 +21,8 @@ public class Profile {
     @Length(max = 50)
     private String location;
 
+    private String profileImageName;
+
     private String profileImageUrl;
 
     public Profile(Account account){
@@ -28,6 +30,7 @@ public class Profile {
         this.location = account.getLocation();
         this.url = account.getUrl();
         this.occupation = account.getOccupation();
+        this.profileImageName = account.getProfileImageName();
         this.profileImageUrl = account.getProfileImageUrl();
     }
 }
