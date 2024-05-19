@@ -1,8 +1,13 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.domain.CameraTag;
+import com.zerozone.vintage.domain.LocationTag;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.settings.Profile;
+import com.zerozone.vintage.tag.CameraTagRepository;
+import com.zerozone.vintage.tag.LocationTagRepository;
+import com.zerozone.vintage.utils.ImageUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,8 @@ public class AccountService {
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final CameraTagRepository cameraTagRepository;
+    private final LocationTagRepository locationTagRepository;
     private final Path rootLocation = Paths.get("uploaded-profile-images"); // 이미지를 저장할 서버 내 폴더 경로 지정
 
 
@@ -73,58 +79,13 @@ public class AccountService {
 
         // 프로필 이미지 처리
         if (profile.getProfileImageUrl() != null && !profile.getProfileImageUrl().isEmpty()) {
-           String imageName = saveImage(profile.getProfileImageUrl());
+           String imageName = ImageUtils.saveImage(profile.getProfileImageUrl());
            profile.setProfileImageUrl(imageName);
         }
 
         modelMapper.map(profile, account);
         accountRepository.save(account);
         return profile;
-    }
-
-    private String saveImage(String imageData) {
-        try {
-            //이미지 저장전에 폴더 존재 여부 먼저 체크
-            ensureDirectoryExists(rootLocation);
-
-            String[] parts = imageData.split(",");
-            String mediaType = parts[0].split(";")[0].split(":")[1]; // MIME 타입 추출
-            String extension = getExtensionFromMediaType(mediaType); // MIME 타입에 기반한 파일 확장자
-            byte[] imageBytes = Base64.getDecoder().decode(parts[1]); // base64 인코딩된 이미지 데이터를 디코딩
-            String imageName = UUID.randomUUID().toString() + extension; // 랜덤 UUID와 결정된 확장자를 사용하여 파일 이름 생성
-
-            // 이미지 파일을 저장할 최종 경로를 설정
-            Path destinationFile = rootLocation.resolve(Paths.get(imageName))
-                    .normalize().toAbsolutePath(); // 절대 경로
-
-            // 생성된 경로에 이미지 데이터를 파일로 쓰기
-            Files.write(destinationFile, imageBytes);
-
-            return imageName; // 저장된 파일의 이름을 반환
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 폴더 저장에 실패 했습니다. ", e);
-        }
-    }
-
-    private String getExtensionFromMediaType(String mediaType) {
-        switch (mediaType) {
-            case "image/jpeg":
-                return ".jpeg";
-            case "image/jpg":
-                return ".jpg";
-            case "image/png":
-                return ".png";
-            case "image/gif":
-                return ".gif";
-            default:
-                throw new IllegalArgumentException("허용하지 않는 타입입니다. : " + mediaType);
-        }
-    }
-
-    private void ensureDirectoryExists(Path path) throws IOException {
-        if (!Files.exists(path)) {
-            Files.createDirectories(path);
-        }
     }
 
     public void updatePassword(Account account, String newPassword) {
@@ -135,5 +96,45 @@ public class AccountService {
     public void updateNickname(Account account, String nickname) {
         account.setNickname(nickname);
         accountRepository.save(account);
+    }
+
+    public void addCameraTag(Account account, CameraTag cameraTag) {
+        if (account.getCameraTags() == null) {
+            account.setCameraTags(new HashSet<>());
+        }
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> a.getCameraTags().add(cameraTag));
+    }
+
+    public Set<CameraTag> getCameraTags(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getCameraTags();
+    }
+
+    public void removeCameraTags(Account account, CameraTag cameraTag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getCameraTags().remove(cameraTag);
+        });
+    }
+
+    public Set<LocationTag> getLocationTags(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getLocationTags();
+    }
+
+    public void addLocationTag(Account account, LocationTag locationTag) {
+        if (account.getLocationTags() == null) {
+            account.setLocationTags(new HashSet<>());
+        }
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> a.getLocationTags().add(locationTag));
+    }
+
+    public void removeLocationTag(Account account, LocationTag locationTag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getLocationTags().remove(locationTag);
+        });
     }
 }
