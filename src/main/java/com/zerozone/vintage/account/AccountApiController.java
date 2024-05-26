@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +36,6 @@ public class AccountApiController {
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
     private final AccountRepository accountRepository;
-    private final SecurityContextHolderStrategy securityContextHolderStrategy;
-    private final SecurityContextRepository securityContextRepository;
-    private final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -59,20 +58,19 @@ public class AccountApiController {
     @PostMapping("/email-verification")
     @Operation(summary = "이메일 인증", description = "제공된 토큰을 사용하여 이메일 인증을 수행.")
     @ApiResponse(responseCode = "200", description = "이메일 인증 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
-    public ResponseEntity<?>checkEmailToken(@RequestBody EmailForm emailForm, HttpServletRequest request, HttpServletResponse response) {
-        Optional<Account> accountOptional = accountRepository.findByEmail(emailForm.getEmail());
-        Map<String, Object> responseMap = new HashMap<>();
+    public ResponseEntity<?> checkEmailToken(@RequestParam String email, @RequestParam String token, HttpServletRequest request, HttpServletResponse response) {
+        Optional<Account> accountOptional = accountRepository.findByEmail(email);
 
         Account account = accountOptional.orElseThrow(() -> new CustomException("잘못된 이메일입니다."));
 
-        if (!account.isValidToken(emailForm.getToken())) {
+        if (!account.isValidToken(token)) {
             throw new CustomException("잘못된 토큰입니다.");
         }
 
         account.completeSignUp();
         AuthenticationManager.login(account, request, response);
-        responseMap.put("nickName", account.getNickname());
-        return ResponseEntity.ok(new CustomResDto<>(1, "이메일 인증 성공", responseMap));
+        //구글 이메일에서 인증 버튼 후 인증 완료 화면으로 다이렉트 이동
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/email-verification-success")).build();
     }
 
 

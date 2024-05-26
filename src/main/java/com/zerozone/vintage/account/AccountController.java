@@ -44,4 +44,9 @@ public class AccountController {
     }
 
 
+    @GetMapping("/email-verification-success")
+    public String emailChecked(Model model){
+        return "mail/email-verification-success";
+    }
+
 }
