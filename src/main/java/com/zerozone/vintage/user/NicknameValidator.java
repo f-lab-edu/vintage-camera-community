@@ -1,4 +1,4 @@
-package com.zerozone.vintage.settings;
+package com.zerozone.vintage.user;
 
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.domain.Account;

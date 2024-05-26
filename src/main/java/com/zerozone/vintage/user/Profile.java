@@ -1,8 +1,6 @@
-package com.zerozone.vintage.settings;
+package com.zerozone.vintage.user;
 
-import com.zerozone.vintage.domain.Account;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 @Data

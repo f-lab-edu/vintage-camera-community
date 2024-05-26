@@ -4,12 +4,8 @@ import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.domain.CameraTag;
 import com.zerozone.vintage.domain.LocationTag;
 import com.zerozone.vintage.exception.CustomException;
-import com.zerozone.vintage.settings.Profile;
-import com.zerozone.vintage.tag.CameraTagRepository;
-import com.zerozone.vintage.tag.LocationTagRepository;
-import com.zerozone.vintage.utils.ImageUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.zerozone.vintage.image.ImageStorageService;
+import com.zerozone.vintage.user.Profile;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,9 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -34,10 +27,7 @@ public class AccountService {
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    private final CameraTagRepository cameraTagRepository;
-    private final LocationTagRepository locationTagRepository;
-    private final Path rootLocation = Paths.get("uploaded-profile-images"); // 이미지를 저장할 서버 내 폴더 경로 지정
-
+    private final ImageStorageService imageStorageService;
 
     public Account newAccountProcess(SignUpForm signUpForm){
         Account newAccount = saveNewAccount(signUpForm);
@@ -75,11 +65,11 @@ public class AccountService {
         javaMailSender.send(mailMessage);
     }
 
-    public Profile updateProfile(Account account, Profile profile) {
+    public Profile updateProfile(Account account, Profile profile) throws IOException {
 
         // 프로필 이미지 처리
         if (profile.getProfileImageUrl() != null && !profile.getProfileImageUrl().isEmpty()) {
-           String imageName = ImageUtils.saveImage(profile.getProfileImageUrl());
+            String imageName = imageStorageService.saveImage(profile.getProfileImageUrl());
            profile.setProfileImageUrl(imageName);
         }
 
@@ -103,7 +93,10 @@ public class AccountService {
             account.setCameraTags(new HashSet<>());
         }
         Optional<Account> byId = accountRepository.findById(account.getId());
-        byId.ifPresent(a -> a.getCameraTags().add(cameraTag));
+        byId.ifPresent(a -> {
+            a.getCameraTags().add(cameraTag);
+            accountRepository.save(a);
+        });
     }
 
     public Set<CameraTag> getCameraTags(Account account) {
@@ -128,7 +121,10 @@ public class AccountService {
             account.setLocationTags(new HashSet<>());
         }
         Optional<Account> byId = accountRepository.findById(account.getId());
-        byId.ifPresent(a -> a.getLocationTags().add(locationTag));
+        byId.ifPresent(a -> {
+            a.getLocationTags().add(locationTag);
+            accountRepository.save(a);
+        });
     }
 
     public void removeLocationTag(Account account, LocationTag locationTag) {

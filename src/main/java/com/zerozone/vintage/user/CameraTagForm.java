@@ -1,4 +1,4 @@
-package com.zerozone.vintage.settings;
+package com.zerozone.vintage.user;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.zerozone.vintage.settings;
+가package com.zerozone.vintage.user;
 
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
@@ -26,15 +26,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class SettingsControllerTest {
+class UserControllerTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -64,7 +64,7 @@ class SettingsControllerTest {
     @Test
     void updateProfileForm() throws Exception{
         String bio = "누구게유";
-        mockMvc.perform(get("/settings/profile"))
+        mockMvc.perform(get("/users/profile"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("profile"));
@@ -76,7 +76,7 @@ class SettingsControllerTest {
     @Test
     void updateProfileWithInputSuccess() throws Exception{
         String bio = "{\"bio\": \"개발자 공존입니다.\"}";
-        mockMvc.perform(post("/api/settings/profile")
+        mockMvc.perform(post("/api/users/me/profile")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(bio)
                         .with(csrf()))
@@ -95,7 +95,7 @@ class SettingsControllerTest {
     void updateProfileWithLongBioError() throws Exception{
         //긴 문장
         String longBio = "{\"bio\": \"나랏말싸미 듕귁에 달아문자와로 서르 사맛디 아니할쎄 이런 전차로 어린 백셩이 니르고져 홇베이셔도 마참네 제 뜨들 시러펴디 몯핧 노미하니아 내 이랄 윙하야 어엿비너겨 새로 스믈 여듫 짜랄 맹가노니사람마다 해여 수비니겨 날로 쑤메 뻔한킈 하고져 할따라미니라\"}";
-        mockMvc.perform(post("/api/settings/profile")
+        mockMvc.perform(post("/api/users/me/profile")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(longBio)
                         .with(csrf()))
@@ -114,7 +114,7 @@ class SettingsControllerTest {
     @DisplayName("패스워드 화면 접근")
     @Test
     void updatePassword_view() throws Exception {
-        mockMvc.perform(get("/settings/password"))
+        mockMvc.perform(get("/users/password"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("passwordForm"));
@@ -126,7 +126,7 @@ class SettingsControllerTest {
     void updatePasswordWithInputSuccess() throws Exception {
         String passwordJson = "{\"newPassword\":\"test1234!\", \"newPasswordConfirm\":\"test1234!\"}";
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/settings/password")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/me/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passwordJson)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
@@ -143,7 +143,7 @@ class SettingsControllerTest {
     void updatePasswordWithInputFail() throws Exception {
         String passwordJson = "{\"newPassword\":\"test1234!\", \"newPasswordConfirm\":\"11111111\"}";
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/settings/password")
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/me/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passwordJson)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
@@ -154,7 +154,7 @@ class SettingsControllerTest {
     @DisplayName("관심카메라 태그 화면 접근")
     @Test
     void cameraTagsView() throws Exception {
-        mockMvc.perform(get("/settings/cameraTags"))
+        mockMvc.perform(get("/users/cameraTags"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"));
     }
@@ -167,7 +167,7 @@ class SettingsControllerTest {
         Account account = accountRepository.findByNickname("zerozone").get();
         accountService.addCameraTag(account, cameraTag);
 
-        mockMvc.perform(get("/api/settings/cameraTags")
+        mockMvc.perform(get("/api/users/me/camera-tags")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1))
@@ -182,10 +182,11 @@ class SettingsControllerTest {
     void addCameraTagsWithSuccess() throws Exception {
         String tagJson = "{\"title\":\"카메라\"}";
 
-        mockMvc.perform(post("/api/settings/cameraTags/add")
+        mockMvc.perform(post("/api/users/me/camera-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tagJson)
                         .with(csrf()))
+                .andDo(print()) // 요청과 응답을 출력하여 디버깅에 도움을 준다.
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1))
                 .andExpect(jsonPath("$.message").value("관심카메라 등록에 성공."));
@@ -193,8 +194,13 @@ class SettingsControllerTest {
         Optional<Account> accountOptional = accountRepository.findByNickname("zerozone");
         assertTrue(accountOptional.isPresent());
         Account account = accountOptional.get();
+        assertNotNull(account.getCameraTags()); // cameraTags가 null이 아닌지 확인
         assertTrue(account.getCameraTags().stream().anyMatch(tag -> tag.getTitle().equals("카메라")));
     }
+
+
+
+
 
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @DisplayName("관심카메라 태그 삭제 성공")
@@ -205,7 +211,7 @@ class SettingsControllerTest {
         accountService.addCameraTag(account, cameraTag);
 
         String tagJson = "{\"title\":\"카메라\"}";
-        mockMvc.perform(post("/api/settings/cameraTags/remove")
+        mockMvc.perform(delete("/api/users/me/camera-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tagJson)
                         .with(csrf()))
@@ -221,7 +227,7 @@ class SettingsControllerTest {
     @DisplayName("활동지역 태그 화면 접근")
     @Test
     void cameraLocationTagsView() throws Exception {
-        mockMvc.perform(get("/settings/cameraLocationsTags"))
+        mockMvc.perform(get("/users/cameraLocationsTags"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("account"));
     }
@@ -234,7 +240,7 @@ class SettingsControllerTest {
         Account account = accountRepository.findByNickname("zerozone").get();
         accountService.addLocationTag(account, locationTag);
 
-        mockMvc.perform(get("/api/settings/cameraLocationsTags")
+        mockMvc.perform(get("/api/users/me/location-tags")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1))
@@ -250,7 +256,7 @@ class SettingsControllerTest {
     void addCameraLocationTagsWithSuccess() throws Exception {
         String tagJson = "{\"title\":\"서울시청\"}";
 
-        mockMvc.perform(post("/api/settings/cameraLocationsTags/add")
+        mockMvc.perform(post("/api/users/me/location-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tagJson)
                         .with(csrf()))
@@ -273,7 +279,7 @@ class SettingsControllerTest {
         accountService.addLocationTag(account, locationTag);
 
         String tagJson = "{\"title\":\"서울시청\"}";
-        mockMvc.perform(post("/api/settings/cameraLocationsTags/remove")
+        mockMvc.perform(delete("/api/users/me/location-tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(tagJson)
                         .with(csrf()))
