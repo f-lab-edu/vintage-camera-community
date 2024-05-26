@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class AccountController {
 
-    private final AccountRepository accountRepository;
-    private final AccountService accountService;
-
     @GetMapping("/account")
     public String signUpForm(Model model){
         model.addAttribute("signUpForm", new SignUpForm());

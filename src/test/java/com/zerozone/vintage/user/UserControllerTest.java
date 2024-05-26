@@ -1,4 +1,4 @@
-가package com.zerozone.vintage.user;
+package com.zerozone.vintage.user;
 
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
