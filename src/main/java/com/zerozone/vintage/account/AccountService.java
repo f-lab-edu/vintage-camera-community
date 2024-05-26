@@ -1,15 +1,22 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.domain.CameraTag;
+import com.zerozone.vintage.domain.LocationTag;
 import com.zerozone.vintage.exception.CustomException;
-import com.zerozone.vintage.settings.Profile;
+import com.zerozone.vintage.image.ImageStorageService;
+import com.zerozone.vintage.user.Profile;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +26,8 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
-
+    private final ModelMapper modelMapper;
+    private final ImageStorageService imageStorageService;
 
     public Account newAccountProcess(SignUpForm signUpForm){
         Account newAccount = saveNewAccount(signUpForm);
@@ -57,14 +65,72 @@ public class AccountService {
         javaMailSender.send(mailMessage);
     }
 
-    public Profile updateProfile(Account account, Profile profile) {
-        account.setUrl(profile.getUrl());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setBio(profile.getBio());
-        account.setProfileImageUrl(profile.getProfileImageUrl());
+    public Profile updateProfile(Account account, Profile profile) throws IOException {
+
+        // 프로필 이미지 처리
+        if (profile.getProfileImageUrl() != null && !profile.getProfileImageUrl().isEmpty()) {
+            String imageName = imageStorageService.saveImage(profile.getProfileImageUrl());
+           profile.setProfileImageUrl(imageName);
+        }
+
+        modelMapper.map(profile, account);
         accountRepository.save(account);
         return profile;
     }
 
+    public void updatePassword(Account account, String newPassword) {
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    public void updateNickname(Account account, String nickname) {
+        account.setNickname(nickname);
+        accountRepository.save(account);
+    }
+
+    public void addCameraTag(Account account, CameraTag cameraTag) {
+        if (account.getCameraTags() == null) {
+            account.setCameraTags(new HashSet<>());
+        }
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getCameraTags().add(cameraTag);
+            accountRepository.save(a);
+        });
+    }
+
+    public Set<CameraTag> getCameraTags(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getCameraTags();
+    }
+
+    public void removeCameraTags(Account account, CameraTag cameraTag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getCameraTags().remove(cameraTag);
+        });
+    }
+
+    public Set<LocationTag> getLocationTags(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getLocationTags();
+    }
+
+    public void addLocationTag(Account account, LocationTag locationTag) {
+        if (account.getLocationTags() == null) {
+            account.setLocationTags(new HashSet<>());
+        }
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getLocationTags().add(locationTag);
+            accountRepository.save(a);
+        });
+    }
+
+    public void removeLocationTag(Account account, LocationTag locationTag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> {
+            a.getLocationTags().remove(locationTag);
+        });
+    }
 }

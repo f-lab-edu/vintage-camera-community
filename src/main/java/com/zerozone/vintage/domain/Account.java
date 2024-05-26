@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -42,6 +44,13 @@ public class Account {
 
     private String profileImageUrl;
 
+    private String profileImageName;
+
+    @ManyToMany
+    private Set<CameraTag> cameraTags = new HashSet<>();
+
+    @ManyToMany
+    private Set<LocationTag> locationTags = new HashSet<>();
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
@@ -60,6 +69,7 @@ public class Account {
     public boolean canSendConfirmEmail() {
         return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
     }
+
 }
 
 

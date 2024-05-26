@@ -10,8 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.5.2",
+    "@yaireo/tagify": "^3.5.1",
     "bootstrap": "^5.3.3",
+    "cropper": "^4.1.0",
     "jdenticon": "^3.2.0",
-    "jquery": "^3.7.1"
+    "jquery": "^3.7.1",
+    "jquery-cropper": "^1.0.1"
   }
 }

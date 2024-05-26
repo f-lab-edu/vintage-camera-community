@@ -120,7 +120,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    debugger;
+
                     if (data.code === 0 && data.data) {
                         Object.keys(data.data).forEach(function (key) {
                             const inputElement = document.getElementById(key);
@@ -202,7 +202,7 @@
             var formData = {
                 "bio": $("#bio").val(),
                 "url": $("#url").val(),
-                "company": $("#company").val(),
+                "occupation": $("#occupation").val(),
                 "location": $("#location").val(),
                 "profileImageUrl": $("#profileImageUrl").val()
             };
