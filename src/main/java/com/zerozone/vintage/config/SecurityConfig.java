@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.springframework.http.HttpMethod.GET;
 
@@ -25,28 +26,25 @@ public class SecurityConfig{
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http
-                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())) // CSRF 보호 활성화
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/account/email-verification", "POST"))
+                )
                 //.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화 /email-verification 포스트맨 테스트 때문에 잠시 비활성화
-                .authorizeHttpRequests((authorizeRequests) ->
-                     authorizeRequests
-                         .requestMatchers("/account","/api/account/account",
-                           "/email-verification", "/api/account/email-verification", "/checked-email"
-                         ).permitAll()
+                .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                         .requestMatchers("/account", "/api/account/account", "/email-verification",
+                                             "/checked-email", "/email-verification-success").permitAll()
                          .requestMatchers("/").permitAll()
                          .requestMatchers("/favicon.ico").permitAll()
-                         .requestMatchers(// Swagger 허용 URL
-                                         "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
+                         .requestMatchers("/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources",
                                          "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**",
                                          "/webjars/**", "/swagger-ui.html").permitAll()
                          .requestMatchers(GET, "/profile/*").permitAll()
                          .requestMatchers(HttpMethod.POST, "/api/account/email-verification").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능
                 )
-                .formLogin((formLogin) ->{
-                    formLogin.loginPage("/login").permitAll();
-                })
+                .formLogin((formLogin) -> formLogin.loginPage("/login").permitAll())
                 .logout(log -> log.logoutSuccessUrl("/"))
-
                 .build();
     }
 

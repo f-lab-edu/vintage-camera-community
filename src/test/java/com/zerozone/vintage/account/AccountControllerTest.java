@@ -1,10 +1,9 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.domain.Account;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeEach;
+import com.zerozone.vintage.mail.EmailMessage;
+import com.zerozone.vintage.mail.EmailService;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +11,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -29,7 +24,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -40,9 +35,7 @@ public class AccountControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private AccountRepository accountRepository;
-    @MockBean
-    JavaMailSender javaMailSender;
-
+    @MockBean EmailService emailService;
 
 
     @DisplayName("회원 가입 화면 보이는지 테스트")
@@ -72,7 +65,7 @@ public class AccountControllerTest {
         assertNotNull(account);
         assertNotEquals(account.getPassword(), "passwrod12!");
         assertNotNull(account.getEmailCheckToken());
-        then(javaMailSender).should().send(any(SimpleMailMessage.class));
+        then(emailService).should().sendEmail(any(EmailMessage.class));
     }
 
     @DisplayName("회원 가입 입력값 오류")
@@ -92,11 +85,9 @@ public class AccountControllerTest {
     @Test
     @DisplayName("인증 메일 입력값 오류")
     void checkEmailTokenWrongInput() throws Exception {
-        String requestBody = "{\"token\":\"asdxcqwqrdvxvsdv\", \"email\":\"wrongTestMail@test.com\"}";
-
         mockMvc.perform(post("/api/account/email-verification")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)
+                        .param("email", "wrongTestMail@test.com")
+                        .param("token", "asdxcqwqrdvxvsdv")
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -117,14 +108,13 @@ public class AccountControllerTest {
 
         String validEmail = "00zero0zone00@gmail.com";
         String invalidToken = "asdasdasdasdxxx";
-        String requestBody = "{\"token\":\"" + invalidToken + "\", \"email\":\"" + validEmail + "\"}";
 
         mockMvc.perform(post("/api/account/email-verification")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)
+                        .param("email", validEmail)
+                        .param("token", invalidToken)
                         .with(csrf()))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("잘못된 토큰입니다."));
     }
 
@@ -139,20 +129,13 @@ public class AccountControllerTest {
         Account newAccount = accountRepository.save(account);
         newAccount.generateEmailCheckToken();
 
-        String requestBody = "{\"token\":\"" + newAccount.getEmailCheckToken() + "\", \"email\":\"" + newAccount.getEmail() + "\"}";
-
         mockMvc.perform(post("/api/account/email-verification")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)
+                        .param("email", newAccount.getEmail())
+                        .param("token", newAccount.getEmailCheckToken())
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value(1))
-                .andExpect(jsonPath("$.message").value("이메일 인증 성공"))
-                .andExpect(jsonPath("$.data.nickName").value("zerozone"));
-
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", "/email-verification-success"));
     }
-
 
 
 }

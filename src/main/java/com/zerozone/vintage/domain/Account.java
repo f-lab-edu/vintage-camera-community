@@ -9,8 +9,12 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Data @EqualsAndHashCode(of = "id")
-@Builder @AllArgsConstructor @NoArgsConstructor
+@Setter
+@Getter
+@EqualsAndHashCode(of = "id")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Account {
 
     @Id @GeneratedValue
