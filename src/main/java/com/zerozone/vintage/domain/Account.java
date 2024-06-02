@@ -51,9 +51,11 @@ public class Account {
     private String profileImageName;
 
     @ManyToMany
+    @Builder.Default
     private Set<CameraTag> cameraTags = new HashSet<>();
 
     @ManyToMany
+    @Builder.Default
     private Set<LocationTag> locationTags = new HashSet<>();
 
     public void generateEmailCheckToken() {

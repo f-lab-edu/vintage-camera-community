@@ -108,9 +108,7 @@ public class AccountService {
     }
 
     public void addCameraTag(Account account, CameraTag cameraTag) {
-        if (account.getCameraTags() == null) {
-            account.setCameraTags(new HashSet<>());
-        }
+
         Optional<Account> byId = accountRepository.findById(account.getId());
         byId.ifPresent(a -> {
             a.getCameraTags().add(cameraTag);
