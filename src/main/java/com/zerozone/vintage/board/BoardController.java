@@ -18,7 +18,7 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @GetMapping("/new-post")
+    @GetMapping("/general")
     public String newPostForm(@CheckedUser Account account, Model model){
         model.addAttribute(account);
         model.addAttribute(new BoardForm());
@@ -33,7 +33,7 @@ public class BoardController {
         return "board/view-board";
     }
 
-    @GetMapping("/edit-post/{id}")
+    @GetMapping("/general/{id}")
     public String editPostForm(@CheckedUser Account account, @PathVariable Long id, Model model) {
         Board board = boardService.findById(id);
         model.addAttribute(account);

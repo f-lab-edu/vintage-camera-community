@@ -3,6 +3,7 @@ package com.zerozone.vintage.board;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,7 +78,7 @@ public class BoardControllerTest {
         boardForm.setCategory(BoardCategory.valueOf("GENERAL"));
         boardForm.setFullDescription("게시글 입니다다다다");
 
-        mockMvc.perform(post("/api/board/new-post")
+        mockMvc.perform(post("/api/board/general")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(boardForm)))
@@ -94,7 +95,7 @@ public class BoardControllerTest {
         boardForm.setCategory(BoardCategory.valueOf("GENERAL"));
         boardForm.setFullDescription("게시글 본문을 수정하겠습니다. 123123123 ");
 
-        mockMvc.perform(post("/api/board/edit-post/1")
+        mockMvc.perform(put("/api/board/general/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(boardForm)))
@@ -106,7 +107,7 @@ public class BoardControllerTest {
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void deletePost() throws Exception {
-        mockMvc.perform(delete("/api/board/delete-post/1")
+        mockMvc.perform(delete("/api/board/general/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("게시글이 삭제되었습니다."));

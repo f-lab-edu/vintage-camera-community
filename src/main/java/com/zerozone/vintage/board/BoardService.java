@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,7 @@ public class BoardService {
                 .orElseThrow(() -> new CustomException("게시글을 찾을 수 없습니다."));
 
         if (!board.getAuthor().equals(account)) {
-            throw new CustomException("삭제 권한이 없습니다.");
+            throw new CustomException("삭제 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 
         boardRepository.delete(board);
