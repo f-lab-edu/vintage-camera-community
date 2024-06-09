@@ -57,4 +57,6 @@ public class Board {
 
     private boolean published; // 공개 여부
 
+    private int viewCount; //조회수
+
 }

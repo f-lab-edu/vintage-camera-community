@@ -1,8 +1,10 @@
 package com.zerozone.vintage.board;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,6 +15,7 @@ import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
 import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.domain.Board;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,7 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,24 +52,24 @@ public class BoardControllerTest {
     @BeforeEach
     void beforeEach() {
         accountRepository.deleteAll();
+
         SignUpForm signUpForm = new SignUpForm();
         signUpForm.setNickName("zerozone");
         signUpForm.setEmail("00zero0zone00@gmail.com");
         signUpForm.setPassword("test0000!");
         accountService.newAccountProcess(signUpForm);
 
+        account = accountRepository.findByNickname("zerozone").get();
+
         board = new Board();
         board.setId(1L);
         board.setBoardCategory(BoardCategory.valueOf("GENERAL"));
         board.setTitle("테스트 제목");
-
-        account = new Account();
-        account.setId(1L);
-        board.setBoardCategory(BoardCategory.valueOf("CAMERA_SHOWCASE"));
-        account.setNickname("zerozone");
+        board.setFullDescription("테스트 본문");
 
         Mockito.when(boardService.createNewPost(any(Board.class), any(Account.class))).thenReturn(board);
         Mockito.when(boardService.updatePost(any(Long.class), any(BoardForm.class), any(Account.class))).thenReturn(board);
+        Mockito.when(boardService.searchPosts(Mockito.any(), Mockito.anyString(), Mockito.anyString())).thenReturn(List.of(board));
     }
 
     @Test
@@ -79,7 +81,7 @@ public class BoardControllerTest {
         boardForm.setFullDescription("게시글 입니다다다다");
 
         mockMvc.perform(post("/api/board/general")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(boardForm)))
                 .andExpect(status().isOk())
@@ -96,7 +98,7 @@ public class BoardControllerTest {
         boardForm.setFullDescription("게시글 본문을 수정하겠습니다. 123123123 ");
 
         mockMvc.perform(put("/api/board/general/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(boardForm)))
                 .andExpect(status().isOk())
@@ -108,8 +110,22 @@ public class BoardControllerTest {
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void deletePost() throws Exception {
         mockMvc.perform(delete("/api/board/general/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("게시글이 삭제되었습니다."));
     }
+
+    @Test
+    @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    void searchPosts() throws Exception {
+        mockMvc.perform(get("/api/board/general/search")
+                        .param("category", "GENERAL")
+                        .param("keyword", "우주")
+                        .param("searchType", "title")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("검색 결과입니다."))
+                .andExpect(jsonPath("$.data[0].title").value(board.getTitle()));
+    }
+
 }

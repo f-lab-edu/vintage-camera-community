@@ -27,6 +27,7 @@ public class BoardController {
 
     @GetMapping("/post/{id}")
     public String viewPost(@CheckedUser Account account, @PathVariable Long id, Model model) {
+        boardService.increaseViewCount(id);
         Board board = boardService.findById(id);
         model.addAttribute("account", account);
         model.addAttribute("board", board);
