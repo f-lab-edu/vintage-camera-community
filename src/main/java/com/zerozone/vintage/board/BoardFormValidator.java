@@ -1,6 +1,5 @@
 package com.zerozone.vintage.board;
 
-import com.zerozone.vintage.domain.Board;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

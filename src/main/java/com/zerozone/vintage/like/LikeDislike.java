@@ -1,5 +1,7 @@
-package com.zerozone.vintage.domain;
+package com.zerozone.vintage.like;
 
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.board.Board;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;

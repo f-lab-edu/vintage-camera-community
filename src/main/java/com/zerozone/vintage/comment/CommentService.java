@@ -1,9 +1,8 @@
 package com.zerozone.vintage.comment;
 
 import com.zerozone.vintage.board.BoardRepository;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
-import com.zerozone.vintage.domain.Comment;
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.board.Board;
 import com.zerozone.vintage.exception.CustomException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;

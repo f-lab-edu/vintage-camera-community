@@ -1,6 +1,7 @@
-package com.zerozone.vintage.domain;
+package com.zerozone.vintage.board;
 
-import com.zerozone.vintage.board.BoardCategory;
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.tag.CameraTag;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

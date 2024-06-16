@@ -1,9 +1,8 @@
 package com.zerozone.vintage.like;
 
 import com.zerozone.vintage.board.BoardRepository;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
-import com.zerozone.vintage.domain.LikeDislike;
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.board.Board;
 import com.zerozone.vintage.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,11 +20,11 @@ public class LikeDislikeService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new CustomException("게시글을 찾을 수 없습니다."));
 
-        LikeDislike likeDislike = LikeDislike.builder()
+        LikeDislike likeDislike = likeDislikeRepository.findByBoardAndAccount(board, account)
+                .orElseGet(() -> LikeDislike.builder()
                 .board(board)
                 .account(account)
-                .isLike(isLike)
-                .build();
+                .build());
         return likeDislikeRepository.save(likeDislike);
     }
 }

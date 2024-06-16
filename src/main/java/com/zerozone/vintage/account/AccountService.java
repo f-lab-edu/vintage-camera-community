@@ -1,9 +1,8 @@
 package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.config.AppProperties;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.CameraTag;
-import com.zerozone.vintage.domain.LocationTag;
+import com.zerozone.vintage.tag.CameraTag;
+import com.zerozone.vintage.tag.LocationTag;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.image.ImageStorageService;
 import com.zerozone.vintage.mail.EmailMessage;

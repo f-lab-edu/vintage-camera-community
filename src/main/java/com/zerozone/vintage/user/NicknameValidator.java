@@ -1,7 +1,7 @@
 package com.zerozone.vintage.user;
 
 import com.zerozone.vintage.account.AccountRepository;
-import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.account.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

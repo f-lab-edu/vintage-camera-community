@@ -1,8 +1,7 @@
 package com.zerozone.vintage.bookmark;
 
-import com.zerozone.vintage.domain.Bookmark;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.board.Board;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.board.BoardRepository;
 import lombok.RequiredArgsConstructor;

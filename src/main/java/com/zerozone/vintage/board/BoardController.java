@@ -1,8 +1,7 @@
 package com.zerozone.vintage.board;
 
 import com.zerozone.vintage.account.CheckedUser;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
+import com.zerozone.vintage.account.Account;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

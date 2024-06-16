@@ -3,9 +3,8 @@ package com.zerozone.vintage.bookmark;
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
-import com.zerozone.vintage.domain.Bookmark;
+import com.zerozone.vintage.account.Account;
+import com.zerozone.vintage.board.Board;
 import com.zerozone.vintage.board.BoardRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +80,7 @@ public class BookmarkApiControllerTest {
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void addBookmark() throws Exception {
-        mockMvc.perform(post("/api/bookmarks/board/" + board.getId())
+        mockMvc.perform(post("/api/boards/" + board.getId() + "/bookmarks")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("북마크 등록 성공."))
@@ -91,7 +90,7 @@ public class BookmarkApiControllerTest {
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void removeBookmark() throws Exception {
-        mockMvc.perform(delete("/api/bookmarks/" + bookmark.getId())
+        mockMvc.perform(delete("/api/boards/" + board.getId() + "/bookmarks" + bookmark.getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("북마크가 삭제되었습니다."));

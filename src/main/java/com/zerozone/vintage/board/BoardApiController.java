@@ -1,8 +1,7 @@
 package com.zerozone.vintage.board;
 
 import com.zerozone.vintage.account.CheckedUser;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Board;
+import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.dto.CustomResDto;
 import com.zerozone.vintage.exception.CustomException;
 import jakarta.validation.Valid;

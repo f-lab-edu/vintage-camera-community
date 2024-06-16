@@ -11,8 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.Comment;
+import com.zerozone.vintage.account.Account;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

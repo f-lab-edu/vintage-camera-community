@@ -1,21 +1,20 @@
 package com.zerozone.vintage.bookmark;
 
-import com.zerozone.vintage.domain.Bookmark;
 import com.zerozone.vintage.account.CheckedUser;
-import com.zerozone.vintage.domain.Account;
+import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.dto.CustomResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/bookmarks")
+@RequestMapping("/api/boards/{boardId}/bookmarks")
 @RequiredArgsConstructor
 public class BookmarkApiController {
 
     private final BookmarkService bookmarkService;
 
-    @PostMapping("/board/{boardId}")
+    @PostMapping
     public ResponseEntity<CustomResDto<Bookmark>> addBookmark(@CheckedUser Account account, @PathVariable Long boardId) {
         Bookmark newBookmark = bookmarkService.addBookmark(boardId, account);
         return ResponseEntity.ok(new CustomResDto<>(1, "북마크 등록 성공.", newBookmark));

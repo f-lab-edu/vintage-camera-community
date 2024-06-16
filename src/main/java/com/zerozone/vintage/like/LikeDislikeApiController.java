@@ -1,8 +1,7 @@
 package com.zerozone.vintage.like;
 
 import com.zerozone.vintage.account.CheckedUser;
-import com.zerozone.vintage.domain.Account;
-import com.zerozone.vintage.domain.LikeDislike;
+import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.dto.CustomResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

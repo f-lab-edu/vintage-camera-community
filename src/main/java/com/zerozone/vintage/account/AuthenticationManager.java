@@ -1,6 +1,5 @@
 package com.zerozone.vintage.account;
 
-import com.zerozone.vintage.domain.Account;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
