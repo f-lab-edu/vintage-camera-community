@@ -1,4 +1,4 @@
-package com.zerozone.vintage.domain;
+package com.zerozone.vintage.tag;
 
 
 import jakarta.persistence.Column;
@@ -14,7 +14,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CameraTag {
+public class LocationTag {
 
     @Id
     @GeneratedValue

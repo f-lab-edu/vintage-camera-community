@@ -1,6 +1,5 @@
 package com.zerozone.vintage.account;
 
-import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.mail.EmailMessage;
 import com.zerozone.vintage.mail.EmailService;
 

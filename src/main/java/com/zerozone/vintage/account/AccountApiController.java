@@ -1,6 +1,5 @@
 package com.zerozone.vintage.account;
 
-import com.zerozone.vintage.domain.Account;
 import com.zerozone.vintage.dto.CustomResDto;
 import com.zerozone.vintage.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,11 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.Valid;

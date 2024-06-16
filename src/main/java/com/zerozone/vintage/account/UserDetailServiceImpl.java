@@ -1,6 +1,5 @@
 package com.zerozone.vintage.account;
 
-import com.zerozone.vintage.domain.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
