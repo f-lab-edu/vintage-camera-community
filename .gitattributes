@@ -1,1 +1,2 @@
 *.properties text eol=lf working-tree-encoding=UTF-8
+*.yml text eol=lf working-tree-encoding=UTF-8
