@@ -4,6 +4,10 @@ import com.zerozone.vintage.account.CheckedUser;
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.dto.CustomResDto;
 import com.zerozone.vintage.exception.CustomException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,8 @@ public class BoardApiController {
     private final ModelMapper modelMapper;
 
     @PostMapping
+    @Operation(summary = "게시글 등록", description = "일반 게시글 등록")
+    @ApiResponse(responseCode = "200", description = "게시글 등록 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Board>> createPost(@CheckedUser Account account, @RequestBody @Valid BoardForm boardForm, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new CustomException("게시글 등록 유효성 검사 실패", bindingResult);
@@ -41,6 +47,8 @@ public class BoardApiController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "게시글 수정", description = "일반 게시글 수정")
+    @ApiResponse(responseCode = "200", description = "게시글 수정 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Board>> updatePost(@CheckedUser Account account, @PathVariable Long id, @RequestBody @Valid BoardForm boardForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new CustomException("게시글 수정 유효성 검사 실패", bindingResult);
@@ -51,6 +59,8 @@ public class BoardApiController {
 
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "게시글 삭제", description = "일반 게시글 삭제")
+    @ApiResponse(responseCode = "200", description = "게시글 삭제 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Board>> deletePost(@CheckedUser Account account, @PathVariable Long id) {
         boardService.deletePost(id, account);
         return ResponseEntity.ok(new CustomResDto<>(1, "게시글이 삭제되었습니다.", null));
@@ -58,6 +68,8 @@ public class BoardApiController {
 
 
     @GetMapping("/search")
+    @Operation(summary = "게시글 검색", description = "일반 게시글 조건 검색")
+    @ApiResponse(responseCode = "200", description = "게시글 검색 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<List<Board>>> searchPosts(@RequestParam(required = false) BoardCategory category, @RequestParam String keyword, @RequestParam String searchType) {
         List<Board> results = boardService.searchPosts(category, keyword, searchType);
         return ResponseEntity.ok(new CustomResDto<>(1, "검색 결과입니다.", results));

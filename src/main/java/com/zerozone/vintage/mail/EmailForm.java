@@ -1,4 +1,4 @@
-package com.zerozone.vintage.account;
+package com.zerozone.vintage.mail;
 
 import lombok.Data;
 
