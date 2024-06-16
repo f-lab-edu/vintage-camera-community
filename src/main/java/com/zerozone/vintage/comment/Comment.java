@@ -2,6 +2,7 @@ package com.zerozone.vintage.comment;
 
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.board.Board;
+import com.zerozone.vintage.meeting.Meeting;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -27,6 +28,9 @@ public class Comment {
 
     @ManyToOne
     private Board board;
+
+    @ManyToOne
+    private Meeting meeting;
 
     @ManyToOne
     private Account author;

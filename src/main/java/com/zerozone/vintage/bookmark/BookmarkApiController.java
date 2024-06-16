@@ -21,8 +21,16 @@ public class BookmarkApiController {
     @PostMapping
     @Operation(summary = "북마크 등록", description = "게시글 관련 북마크 등록")
     @ApiResponse(responseCode = "200", description = "북마크 등록 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
-    public ResponseEntity<CustomResDto<Bookmark>> addBookmark(@CheckedUser Account account, @PathVariable Long boardId) {
-        Bookmark newBookmark = bookmarkService.addBookmark(boardId, account);
+    public ResponseEntity<CustomResDto<Bookmark>> addBookmarkToBoard(@CheckedUser Account account, @PathVariable Long boardId) {
+        Bookmark newBookmark = bookmarkService.addBookmarkToBoard(boardId, account);
+        return ResponseEntity.ok(new CustomResDto<>(1, "북마크 등록 성공.", newBookmark));
+    }
+
+    @PostMapping("/meeting/{meetingId}")
+    @Operation(summary = "모임 북마크 등록", description = "모임 관련 북마크 등록")
+    @ApiResponse(responseCode = "200", description = "북마크 등록 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
+    public ResponseEntity<CustomResDto<Bookmark>> addBookmarkToMeeting(@CheckedUser Account account, @PathVariable Long meetingId) {
+        Bookmark newBookmark = bookmarkService.addBookmarkToMeeting(meetingId, account);
         return ResponseEntity.ok(new CustomResDto<>(1, "북마크 등록 성공.", newBookmark));
     }
 

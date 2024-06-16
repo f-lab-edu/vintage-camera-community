@@ -27,8 +27,16 @@ public class CommentApiController {
     @PostMapping("/board/{boardId}")
     @Operation(summary = "댓글 등록", description = "게시글 관련 댓글 등록")
     @ApiResponse(responseCode = "200", description = "게시글 댓글 등록 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
-    public ResponseEntity<CustomResDto<Comment>> createComment(@CheckedUser Account account, @PathVariable Long boardId, @RequestBody String content) {
-        Comment newComment = commentService.createComment(boardId, content, account);
+    public ResponseEntity<CustomResDto<Comment>> createBoardComment(@CheckedUser Account account, @PathVariable Long boardId, @RequestBody String content) {
+        Comment newComment = commentService.createBoardComment(boardId, content, account);
+        return ResponseEntity.ok(new CustomResDto<>(1, "댓글 등록에 성공.", newComment));
+    }
+
+    @PostMapping("/meeting/{meetingId}")
+    @Operation(summary = "모임 댓글 등록", description = "모임 관련 댓글 등록")
+    @ApiResponse(responseCode = "200", description = "모임 댓글 등록 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
+    public ResponseEntity<CustomResDto<Comment>> createMeetingComment(@CheckedUser Account account, @PathVariable Long meetingId, @RequestBody String content) {
+        Comment newComment = commentService.createMeetingComment(meetingId, content, account);
         return ResponseEntity.ok(new CustomResDto<>(1, "댓글 등록에 성공.", newComment));
     }
 

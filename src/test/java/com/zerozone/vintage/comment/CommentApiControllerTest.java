@@ -59,7 +59,7 @@ public class CommentApiControllerTest {
         account.setId(1L);
         account.setNickname("테스트유저");
 
-        Mockito.when(commentService.createComment(any(Long.class), any(String.class), any(Account.class))).thenReturn(comment);
+        Mockito.when(commentService.createBoardComment(any(Long.class), any(String.class), any(Account.class))).thenReturn(comment);
         Mockito.when(commentService.updateComment(any(Long.class), any(String.class), any(Account.class))).thenReturn(comment);
     }
 

@@ -24,7 +24,10 @@ public class LikeDislikeService {
                 .orElseGet(() -> LikeDislike.builder()
                 .board(board)
                 .account(account)
+                .isLike(isLike)
                 .build());
+
+        likeDislike.setLike(isLike);
         return likeDislikeRepository.save(likeDislike);
     }
 }

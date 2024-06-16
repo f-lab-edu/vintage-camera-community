@@ -4,6 +4,8 @@ import com.zerozone.vintage.board.BoardRepository;
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.board.Board;
 import com.zerozone.vintage.exception.CustomException;
+import com.zerozone.vintage.meeting.Meeting;
+import com.zerozone.vintage.meeting.MeetingRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,12 +19,25 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
+    private final MeetingRepository meetingRepository;
 
-    public Comment createComment(Long boardId, String content, Account account) {
+    public Comment createBoardComment(Long boardId, String content, Account account) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new CustomException("게시글을 찾을 수 없습니다."));
         Comment comment = Comment.builder()
                 .board(board)
+                .author(account)
+                .content(content)
+                .createdDateTime(LocalDateTime.now())
+                .build();
+        return commentRepository.save(comment);
+    }
+
+    public Comment createMeetingComment(Long meetingId, String content, Account account) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
+        Comment comment = Comment.builder()
+                .meeting(meeting)
                 .author(account)
                 .content(content)
                 .createdDateTime(LocalDateTime.now())
