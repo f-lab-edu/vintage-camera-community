@@ -21,59 +21,66 @@ public class MeetingService {
 
     public Meeting createMeeting(Meeting meeting, Account organizer) {
         meeting.setOrganizer(organizer);
-        meeting.setStatus(MeetingStatus.NOT_STARTED);  // 우선 임시로 초기 상태는 NOT_STARTED
+        meeting.setStatus(MeetingStatus.NOT_STARTED);
         return meetingRepository.save(meeting);
     }
 
     public Meeting updateMeeting(Long id, Meeting meetingDetails, Account organizer) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
-
-        if (!meeting.getOrganizer().equals(organizer)) {
-            throw new CustomException("수정 권한이 없습니다.", HttpStatus.FORBIDDEN);
-        }
-
+        Meeting meeting = findMeeting(id);
+        checkUpdatePermission(meeting, organizer);
         modelMapper.map(meetingDetails, meeting);
-
         return meetingRepository.save(meeting);
     }
 
     public void deleteMeeting(Long id, Account organizer) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
-
-        if (!meeting.getOrganizer().equals(organizer)) {
-            throw new CustomException("삭제 권한이 없습니다.", HttpStatus.FORBIDDEN);
-        }
-
+        Meeting meeting = findMeeting(id);
+        checkDeletePermission(meeting, organizer);
         meetingRepository.delete(meeting);
     }
 
-    public List<Meeting> getAllMeetings() {
-        return meetingRepository.findAll();
+    public Page<Meeting> getAllMeetings(Pageable pageable) {
+        return meetingRepository.findAll(pageable);
     }
 
     public void joinMeeting(Long id, Account account) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
+        Meeting meeting = findMeeting(id);
         meeting.getParticipants().add(account);
         meetingRepository.save(meeting);
     }
 
     public void updateMeetingStatus(Long id, MeetingStatus status) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
+        Meeting meeting = findMeeting(id);
         meeting.setStatus(status);
         meetingRepository.save(meeting);
     }
 
-    public Page<Meeting> searchMeetings(String keyword, String searchType, Pageable pageable) {
-        if ("title".equalsIgnoreCase(searchType)) {
-            return meetingRepository.findByTitle(keyword, pageable);
-        } else if ("description".equalsIgnoreCase(searchType)) {
-            return meetingRepository.findByDescription(keyword, pageable);
+    public Page<Meeting> searchMeetings(String keyword, SearchType searchType, Pageable pageable) {
+        if (searchType == SearchType.TITLE) {
+            return meetingRepository.findByTitleContaining(keyword, pageable);
+        } else if (searchType == SearchType.DESCRIPTION) {
+            return meetingRepository.findByDescriptionContaining(keyword, pageable);
         } else {
-            return meetingRepository.findByTitleOrDescription(keyword, keyword, pageable);
+            return meetingRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword, pageable);
         }
     }
+
+    private Meeting findMeeting(Long id) {
+        return meetingRepository.findById(id)
+                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
+    }
+
+    private void checkUpdatePermission(Meeting meeting, Account organizer) {
+        if (!meeting.getOrganizer().equals(organizer)) {
+            throw new CustomException("수정 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private void checkDeletePermission(Meeting meeting, Account organizer) {
+        if (!meeting.getOrganizer().equals(organizer)) {
+            throw new CustomException("삭제 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+    }
+
+
+
 }

@@ -72,8 +72,8 @@ public class MeetingApiController {
     @GetMapping
     @Operation(summary = "모임 조회", description = "모임 게시글 목록 조회")
     @ApiResponse(responseCode = "200", description = "모임 게시글 목록 조회 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
-    public ResponseEntity<CustomResDto<List<Meeting>>> getAllMeetings() {
-        List<Meeting> meetings = meetingService.getAllMeetings();
+    public ResponseEntity<CustomResDto<Page<Meeting>>> getAllMeetings(@PageableDefault(size = 10) Pageable pageable) {
+        Page<Meeting> meetings = meetingService.getAllMeetings(pageable);
         return ResponseEntity.ok(new CustomResDto<>(1, "모임 조회 성공.", meetings));
     }
 
@@ -94,9 +94,9 @@ public class MeetingApiController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "모임 게시글 검색", description = "모암 게시글 조건 검색")
+    @Operation(summary = "모임 게시글 검색", description = "모임 게시글 조건 검색")
     @ApiResponse(responseCode = "200", description = "모임 게시글 검색 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
-    public ResponseEntity<CustomResDto<org.springframework.data.domain.Page<Meeting>>> searchMeetings(@RequestParam String keyword, @RequestParam String searchType, @PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<CustomResDto<Page<Meeting>>> searchMeetings(@RequestParam String keyword, @RequestParam SearchType searchType, @PageableDefault(size = 10) Pageable pageable) {
         Page<Meeting> meetings = meetingService.searchMeetings(keyword, searchType, pageable);
         return ResponseEntity.ok(new CustomResDto<>(1, "검색 결과입니다.", meetings));
     }
