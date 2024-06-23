@@ -2,6 +2,7 @@ package com.zerozone.vintage.account;
 
 import com.zerozone.vintage.dto.CustomResDto;
 import com.zerozone.vintage.exception.CustomException;
+import com.zerozone.vintage.mail.EmailForm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

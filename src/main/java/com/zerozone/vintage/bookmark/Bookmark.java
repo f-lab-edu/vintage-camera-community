@@ -2,6 +2,7 @@ package com.zerozone.vintage.bookmark;
 
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.board.Board;
+import com.zerozone.vintage.meeting.Meeting;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -26,6 +27,9 @@ public class Bookmark {
 
     @ManyToOne
     private Board board;
+
+    @ManyToOne
+    private Meeting meeting;
 
     @ManyToOne
     private Account account;

@@ -73,7 +73,7 @@ public class BookmarkApiControllerTest {
         bookmark.setAccount(account);
         bookmark = bookmarkRepository.save(bookmark);
 
-        Mockito.when(bookmarkService.addBookmark(Mockito.anyLong(), Mockito.any(Account.class))).thenReturn(bookmark);
+        Mockito.when(bookmarkService.addBookmarkToBoard(Mockito.anyLong(), Mockito.any(Account.class))).thenReturn(bookmark);
         Mockito.doNothing().when(bookmarkService).removeBookmark(Mockito.anyLong(), Mockito.any(Account.class));
     }
 
@@ -90,7 +90,7 @@ public class BookmarkApiControllerTest {
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void removeBookmark() throws Exception {
-        mockMvc.perform(delete("/api/boards/" + board.getId() + "/bookmarks" + bookmark.getId())
+        mockMvc.perform(delete("/api/boards/" + board.getId() + "/bookmarks/" + bookmark.getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("북마크가 삭제되었습니다."));
