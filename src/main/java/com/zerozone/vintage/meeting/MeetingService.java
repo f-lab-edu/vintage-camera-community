@@ -2,7 +2,7 @@ package com.zerozone.vintage.meeting;
 
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.exception.CustomException;
-import java.util.List;
+import com.zerozone.vintage.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
+    private final NotificationService notificationService;
     private final ModelMapper modelMapper;
 
     public Meeting createMeeting(Meeting meeting, Account organizer) {
@@ -43,9 +44,12 @@ public class MeetingService {
     }
 
     public void joinMeeting(Long id, Account account) {
-        Meeting meeting = findMeeting(id);
+        Meeting meeting = meetingRepository.findById(id)
+                .orElseThrow(() -> new CustomException("모임을 찾을 수 없습니다."));
         meeting.getParticipants().add(account);
         meetingRepository.save(meeting);
+
+        notificationService.createNotification(meeting.getOrganizer(), account.getNickname() + "님이 모임에 참여했습니다.");
     }
 
     public void updateMeetingStatus(Long id, MeetingStatus status) {
