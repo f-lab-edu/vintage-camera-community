@@ -40,7 +40,7 @@ public class MeetingService {
     }
 
     public Page<Meeting> getAllMeetings(Pageable pageable) {
-        return meetingRepository.findAll(pageable);
+        return meetingRepository.findAllWithFetchJoin(pageable);
     }
 
     public void joinMeeting(Long id, Account account) {
@@ -59,13 +59,10 @@ public class MeetingService {
     }
 
     public Page<Meeting> searchMeetings(String keyword, SearchType searchType, Pageable pageable) {
-        if (searchType == SearchType.TITLE) {
-            return meetingRepository.findByTitleContaining(keyword, pageable);
-        } else if (searchType == SearchType.DESCRIPTION) {
-            return meetingRepository.findByDescriptionContaining(keyword, pageable);
-        } else {
-            return meetingRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword, pageable);
+        if (searchType == SearchType.TITLE || searchType == SearchType.DESCRIPTION) {
+            return meetingRepository.searchByFullText(keyword, pageable);
         }
+        throw new IllegalArgumentException("Unsupported search type");
     }
 
     private Meeting findMeeting(Long id) {
@@ -84,7 +81,5 @@ public class MeetingService {
             throw new CustomException("삭제 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
     }
-
-
 
 }

@@ -25,23 +25,12 @@ public class LikeDislikeService {
                 .orElseThrow(() -> new CustomException("게시글을 찾을 수 없습니다."));
 
 
-        // LikeDislike 엔티티에 대해 비관적 락 적용
         LikeDislike likeDislike = likeDislikeRepository.findByBoardAndAccount(board, account)
                 .orElseGet(() -> LikeDislike.builder()
                         .board(board)
                         .account(account)
                         .isLike(isLike)
                         .build());
-
-        // 존재하는 경우 비관적 락 적용
-        if (likeDislike.getId() != null) {
-            entityManager.lock(likeDislike, LockModeType.PESSIMISTIC_WRITE);
-        } else {
-            // 새로운 경우 비관적 락 적용
-            entityManager.persist(likeDislike);
-            entityManager.flush();
-            entityManager.lock(likeDislike, LockModeType.PESSIMISTIC_WRITE);
-        }
 
         likeDislike.setLike(isLike);
         return likeDislikeRepository.save(likeDislike);
