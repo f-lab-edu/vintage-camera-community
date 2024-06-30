@@ -1,0 +1,95 @@
+plugins {
+	id 'java'
+	id 'checkstyle'
+	id 'org.springframework.boot' version '3.2.4'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id "com.github.node-gradle.node" version "3.5.0"
+}
+
+group = 'com.zerozone'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+checkstyle {
+	//maxWarnings = 0 // 규칙x일 경우 빌드 fail
+	configFile = file("config/checkstyle/google_checks.xml")
+	toolVersion = "10.11.0"
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+node {
+	download = true
+	version = "16.14.0"
+	npmVersion = ""
+	yarnVersion = ""
+	distBaseUrl = "https://nodejs.org/dist"
+	allowInsecureProtocol = null
+	npmInstallCommand = "install"
+	workDir = file("${project.projectDir}/.gradle/nodejs")
+	npmWorkDir = file("${project.projectDir}/.gradle/npm")
+	yarnWorkDir = file("${project.projectDir}/.gradle/yarn")
+	nodeProjectDir = file("${project.projectDir}/src/main/resources/static")
+	nodeProxySettings = ProxySettings.SMART
+}
+
+dependencies {
+	// View Template Engine
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+	//Web
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//Persistence
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// LomBok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Dev
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+	//Test Implementation
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+
+	//ModelMapper
+	implementation 'org.modelmapper:modelmapper:3.0.0'
+
+	//spring Metrics
+	implementation 'io.micrometer:micrometer-core'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	jvmArgs '-Xshare:off' // JVM 아규먼트 설정
+}
+
+processResources.dependsOn('npmInstall')
