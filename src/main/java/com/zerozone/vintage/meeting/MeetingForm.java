@@ -3,8 +3,7 @@ package com.zerozone.vintage.meeting;
 import com.zerozone.vintage.tag.CameraTag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Data;
 
@@ -18,16 +17,10 @@ public class MeetingForm {
     private String description;
 
     @NotNull
-    private LocalDate startDate;
+    private LocalDateTime startDateTime;
 
     @NotNull
-    private LocalDate endDate;
-
-    @NotNull
-    private LocalTime startTime;
-
-    @NotNull
-    private LocalTime endTime;
+    private LocalDateTime endDateTime;
 
     private Set<CameraTag> tags;
 

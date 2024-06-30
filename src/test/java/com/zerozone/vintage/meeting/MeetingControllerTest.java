@@ -12,12 +12,14 @@ import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @Transactional
 class MeetingApiControllerTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(MeetingApiControllerTest.class);
 
     @Autowired
     private MockMvc mockMvc;
@@ -145,10 +149,8 @@ class MeetingApiControllerTest {
         MeetingForm meetingForm = new MeetingForm();
         meetingForm.setTitle("테스트 모임 제목123");
         meetingForm.setDescription("테스트 모임 설명 블라 블라 블라");
-        meetingForm.setStartDate(LocalDate.now());
-        meetingForm.setEndDate(LocalDate.now().plusDays(1));
-        meetingForm.setStartTime(LocalTime.of(10, 0));
-        meetingForm.setEndTime(LocalTime.of(18, 0));
+        meetingForm.setStartDateTime(LocalDateTime.of(2024, 6, 24, 10, 0));
+        meetingForm.setEndDateTime(LocalDateTime.of(2024, 6, 25, 18, 0));
         meetingForm.setTags(Collections.emptySet());
         meetingForm.setPublic(true);
 
@@ -159,10 +161,8 @@ class MeetingApiControllerTest {
         return Meeting.builder()
                 .title("테스트 모임 제목123")
                 .description("테스트 모임 설명 블라 블라 블라")
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusDays(1))
-                .startTime(LocalTime.of(10, 0))
-                .endTime(LocalTime.of(18, 0))
+                .startDateTime(LocalDateTime.of(2024, 6, 24, 10, 0))
+                .endDateTime(LocalDateTime.of(2024, 6, 25, 18, 0))
                 .tags(Collections.emptySet())
                 .organizer(account)
                 .status(MeetingStatus.NOT_STARTED)
