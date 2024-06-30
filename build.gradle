@@ -79,6 +79,12 @@ dependencies {
 
 	//ModelMapper
 	implementation 'org.modelmapper:modelmapper:3.0.0'
+
+	//spring Metrics
+	implementation 'io.micrometer:micrometer-core'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 }
 
 tasks.named('test') {

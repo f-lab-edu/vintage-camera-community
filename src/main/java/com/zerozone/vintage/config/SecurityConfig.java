@@ -39,6 +39,7 @@ public class SecurityConfig{
                                          "/swagger-resources/**", "/configuration/ui", "/configuration/security",
                                          "/swagger-ui/**", "/webjars/**", "/swagger-ui.html").permitAll()
                          .requestMatchers(GET, "/profile/*").permitAll()
+                         .requestMatchers("/actuator/**").permitAll()
                          .requestMatchers(HttpMethod.POST, "/api/account/email-verification").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능
                 )
