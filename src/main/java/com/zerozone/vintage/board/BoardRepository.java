@@ -15,6 +15,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional(readOnly = false)
+    @Query("SELECT b FROM Board b WHERE b.id = :id")
     Optional<Board> findByIdForUpdate(Long id);
 
     //네이티브 쿼리
