@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -69,15 +70,16 @@ class ChatApiControllerTest {
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void sendMessage() throws Exception {
         ChatMessage message = new ChatMessage();
-        message.setAuthorId("1");
+        message.setAuthorId(1L);
         message.setAuthorName("zerozone");
+        message.setOtherUserId(2L);
         message.setContent("하이루!");
-        message.setRoomId(1L);
 
         ChatMessage savedMessage = new ChatMessage();
         savedMessage.setId(1L);
-        savedMessage.setAuthorId("1");
+        savedMessage.setAuthorId(1L);
         savedMessage.setAuthorName("zerozone");
+        savedMessage.setOtherUserId(2L);
         savedMessage.setContent("하이루!");
         savedMessage.setRoomId(1L);
 
@@ -98,15 +100,17 @@ class ChatApiControllerTest {
     void getMessages() throws Exception {
         ChatMessage message1 = new ChatMessage();
         message1.setId(1L);
-        message1.setAuthorId("1");
+        message1.setAuthorId(1L);
         message1.setAuthorName("zerozone");
+        message1.setOtherUserId(2L);
         message1.setContent("하이루!");
         message1.setRoomId(1L);
 
         ChatMessage message2 = new ChatMessage();
         message2.setId(2L);
-        message2.setAuthorId("2");
+        message2.setAuthorId(2L);
         message2.setAuthorName("otherUser");
+        message2.setOtherUserId(1L);
         message2.setContent("방가!");
         message2.setRoomId(1L);
 
@@ -125,12 +129,25 @@ class ChatApiControllerTest {
 
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    void getOrCreateRoomId() throws Exception {
-        Mockito.when(chatRoomService.getOrCreateRoomId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(1L);
+    void getRoomId() throws Exception {
+        Mockito.when(chatRoomService.getRoomId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+                Optional.of(new ChatRoom(1L, 1L, 2L, 0L)));
 
         mockMvc.perform(get("/api/chat/roomId?otherUserId=2")
                         .with(csrf()))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(1L));
+    }
+
+    @Test
+    @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    void createRoom() throws Exception {
+        Mockito.when(chatRoomService.createRoom(Mockito.anyLong(), Mockito.anyLong())).thenReturn(1L);
+
+        mockMvc.perform(post("/api/chat/room")
+                        .param("otherUserId", "2")
+                        .with(csrf()))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data").value(1L));
     }
 }
