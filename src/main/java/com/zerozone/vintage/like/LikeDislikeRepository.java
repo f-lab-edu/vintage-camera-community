@@ -10,6 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
 public interface LikeDislikeRepository extends JpaRepository<LikeDislike, Long> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+
     Optional<LikeDislike> findByBoardAndAccount(Board board, Account account);
 }
