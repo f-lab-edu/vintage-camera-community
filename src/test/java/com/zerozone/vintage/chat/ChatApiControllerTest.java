@@ -1,10 +1,10 @@
 package com.zerozone.vintage.chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.account.AccountRepository;
 import com.zerozone.vintage.account.AccountService;
 import com.zerozone.vintage.account.SignUpForm;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -49,6 +49,9 @@ class ChatApiControllerTest {
     @Autowired
     private AccountService accountService;
 
+    private Account zerozoneAccount;
+    private Account otherUserAccount;
+
     @BeforeEach
     void setup() {
         accountRepository.deleteAll();
@@ -57,29 +60,29 @@ class ChatApiControllerTest {
         signUpForm.setNickName("zerozone");
         signUpForm.setEmail("00zero0zone00@gmail.com");
         signUpForm.setPassword("test0000!");
-        accountService.newAccountProcess(signUpForm);
+        zerozoneAccount = accountService.newAccountProcess(signUpForm);
 
         SignUpForm otherUserForm = new SignUpForm();
         otherUserForm.setNickName("otherUser");
         otherUserForm.setEmail("otherUser@google.com");
         otherUserForm.setPassword("password123!!");
-        accountService.newAccountProcess(otherUserForm);
+        otherUserAccount = accountService.newAccountProcess(otherUserForm);
     }
 
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void sendMessage() throws Exception {
         ChatMessage message = new ChatMessage();
-        message.setAuthorId(1L);
-        message.setAuthorName("zerozone");
-        message.setOtherUserId(2L);
+        message.setAuthorId(zerozoneAccount.getId());
+        message.setAuthorName(zerozoneAccount.getNickname());
+        message.setOtherUserId(otherUserAccount.getId());
         message.setContent("하이루!");
 
         ChatMessage savedMessage = new ChatMessage();
         savedMessage.setId(1L);
-        savedMessage.setAuthorId(1L);
-        savedMessage.setAuthorName("zerozone");
-        savedMessage.setOtherUserId(2L);
+        savedMessage.setAuthorId(zerozoneAccount.getId());
+        savedMessage.setAuthorName(zerozoneAccount.getNickname());
+        savedMessage.setOtherUserId(otherUserAccount.getId());
         savedMessage.setContent("하이루!");
         savedMessage.setRoomId(1L);
 
@@ -100,17 +103,17 @@ class ChatApiControllerTest {
     void getMessages() throws Exception {
         ChatMessage message1 = new ChatMessage();
         message1.setId(1L);
-        message1.setAuthorId(1L);
-        message1.setAuthorName("zerozone");
-        message1.setOtherUserId(2L);
+        message1.setAuthorId(zerozoneAccount.getId());
+        message1.setAuthorName(zerozoneAccount.getNickname());
+        message1.setOtherUserId(otherUserAccount.getId());
         message1.setContent("하이루!");
         message1.setRoomId(1L);
 
         ChatMessage message2 = new ChatMessage();
         message2.setId(2L);
-        message2.setAuthorId(2L);
-        message2.setAuthorName("otherUser");
-        message2.setOtherUserId(1L);
+        message2.setAuthorId(otherUserAccount.getId());
+        message2.setAuthorName(otherUserAccount.getNickname());
+        message2.setOtherUserId(zerozoneAccount.getId());
         message2.setContent("방가!");
         message2.setRoomId(1L);
 
@@ -130,8 +133,7 @@ class ChatApiControllerTest {
     @Test
     @WithUserDetails(value = "zerozone", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void getRoomId() throws Exception {
-        Mockito.when(chatRoomService.getRoomId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(
-                Optional.of(new ChatRoom(1L, 1L, 2L, 0L)));
+        Mockito.when(chatRoomService.getRoomId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(1L);
 
         mockMvc.perform(get("/api/chat/roomId?otherUserId=2")
                         .with(csrf()))

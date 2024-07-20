@@ -62,10 +62,12 @@ public class ChatApiController {
     @Operation(summary = "채팅방 ID 조회", description = "상대방 ID를 사용하여 채팅방 ID를 조회")
     @ApiResponse(responseCode = "200", description = "채팅방 ID 조회 성공", content = @Content(schema = @Schema(implementation = CustomResDto.class)))
     public ResponseEntity<CustomResDto<Long>> getRoomId(@CheckedUser Account account, @RequestParam Long otherUserId) {
-        Optional<ChatRoom> roomOpt = chatRoomService.getRoomId(account.getId(), otherUserId);
-        return roomOpt.map(chatRoom -> ResponseEntity.ok(
-                        new CustomResDto<>(1, "채팅방 ID 조회 성공", chatRoom.getId())))
-                .orElseGet(() -> ResponseEntity.ok(new CustomResDto<>(0, "채팅방이 존재하지 않습니다.", null)));
+        Long roomId = chatRoomService.getRoomId(account.getId(), otherUserId);
+        if (roomId != null) {
+            return ResponseEntity.ok(new CustomResDto<>(1, "채팅방 ID 조회 성공", roomId));
+        } else {
+            return ResponseEntity.ok(new CustomResDto<>(0, "채팅방이 존재하지 않습니다.", null));
+        }
     }
 
     @PostMapping("/room")

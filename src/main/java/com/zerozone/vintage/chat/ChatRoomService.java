@@ -34,13 +34,16 @@ public class ChatRoomService {
         }
     }
 
-    public Optional<ChatRoom> getRoomId(Long user1Id, Long user2Id) {
+    public Long getRoomId(Long user1Id, Long user2Id) {
         if (user1Id == null || user2Id == null) {
             throw new IllegalArgumentException("채팅 유저ID가 없습니다. 확인해주세요.");
         }
 
-        return chatRoomRepository.findByUser1IdAndUser2IdOrUser2IdAndUser1Id(user1Id, user2Id, user2Id, user1Id);
+        return chatRoomRepository.findByUser1IdAndUser2IdOrUser2IdAndUser1Id(user1Id, user2Id, user2Id, user1Id)
+                .map(ChatRoom::getId)
+                .orElse(null);
     }
+
 
     public Long createRoom(Long user1Id, Long user2Id) {
         if (user1Id == null || user2Id == null) {
