@@ -20,7 +20,10 @@ public class ChatRoomService {
         }
 
         try {
-            Optional<ChatRoom> roomOpt = chatRoomRepository.findByUser1IdAndUser2IdOrUser2IdAndUser1Id(user1Id, user2Id, user2Id, user1Id);
+            Long minId = Math.min(user1Id, user2Id);
+            Long maxId = Math.max(user1Id, user2Id);
+
+            Optional<ChatRoom> roomOpt = chatRoomRepository.findByUser1IdAndUser2Id(minId, maxId);
 
             return roomOpt.map(ChatRoom::getId).orElseGet(() -> {
                 ChatRoom newRoom = ChatRoom.builder()
@@ -39,10 +42,14 @@ public class ChatRoomService {
             throw new IllegalArgumentException("채팅 유저ID가 없습니다. 확인해주세요.");
         }
 
-        return chatRoomRepository.findByUser1IdAndUser2IdOrUser2IdAndUser1Id(user1Id, user2Id, user2Id, user1Id)
+        Long minId = Math.min(user1Id, user2Id);
+        Long maxId = Math.max(user1Id, user2Id);
+
+        return chatRoomRepository.findByUser1IdAndUser2Id(minId, maxId)
                 .map(ChatRoom::getId)
                 .orElse(null);
     }
+
 
 
     public Long createRoom(Long user1Id, Long user2Id) {

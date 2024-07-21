@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -77,5 +76,4 @@ public class ChatApiController {
         Long roomId = chatRoomService.createRoom(account.getId(), otherUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new CustomResDto<>(1, "채팅방 생성 성공", roomId));
     }
-
 }

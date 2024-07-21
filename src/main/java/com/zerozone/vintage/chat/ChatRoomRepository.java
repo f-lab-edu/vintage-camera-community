@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Lock(LockModeType.OPTIMISTIC)
-    Optional<ChatRoom> findByUser1IdAndUser2IdOrUser2IdAndUser1Id(Long user1Id, Long user2Id, Long user2Id2, Long user1Id2);
+    Optional<ChatRoom> findByUser1IdAndUser2Id(Long minId, Long maxId);
 }
