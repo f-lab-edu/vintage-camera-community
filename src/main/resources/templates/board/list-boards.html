@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+<div th:replace="fragments.html :: mainNav"></div>
+<div class="container">
+  <div class="py-5 text-center">
+    <h2>게시글 목록 페이지</h2>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-sm-10">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>카테고리</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>게시일</th>
+          <th>수정</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="board : ${boards}">
+          <td th:text="${board.boardCategory}">카테고리</td>
+          <td>
+            <a th:href="@{/post/{id}(id=${board.id})}" th:text="${board.title}">제목</a>
+          </td>
+          <td th:text="${board.author.nickname}">작성자</td>
+          <td th:text="${#temporals.format(board.publishedDateTime, 'yyyy-MM-dd HH:mm')}">게시일</td>
+          <td>
+            <a th:href="@{/general/{id}(id=${board.id})}" class="btn btn-warning" th:if="${board.author.nickname == #authentication.name}">수정</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <a th:href="@{/general}" class="btn btn-primary">새 게시글 작성</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

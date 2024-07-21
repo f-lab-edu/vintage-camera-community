@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+<div th:replace="fragments.html :: mainNav"></div>
+
+<div class="container">
+    <div class="row mt-5 justify-content-center">
+        <div class="col-2">
+            <div th:replace="fragments.html :: settings-side-menu(currentMenu='account')"></div>
+        </div>
+        <div class="col-8">
+            <div class="row">
+                <h2 class="col-12">닉네임 변경</h2>
+            </div>
+            <div class="row">
+                <form id="nickNameForm" class="col-12" novalidate>
+                    <div class="form-group">
+                        <input id="nickName" type="text" class="form-control" aria-describedby="nickNameHelp" required>
+                        <small id="nickNameHelp" class="form-text text-muted">
+                            3자 이상 20자 이내로 입력하세요.
+                        </small>
+                        <div class="invalid-feedback">닉네임을 입력하세요.</div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <button type="submit" class="btn btn-outline-primary">변경하기</button>
+                    </div>
+                </form>
+            </div>
+            <div id="responseMessage" class="alert mt-2" style="display: none;"></div>
+
+            <div class="dropdown-divider mt-4"></div>
+            <div class="row mt-4">
+                <div class="col-sm-12">
+                    <h2 class="text-danger">계정 삭제</h2>
+                    <div class="alert alert-danger" role="alert">
+                        이 계정은 삭제할 수 없습니다.
+                    </div>
+                    <button class="btn btn-outline-danger disabled">계정 삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:replace="fragments.html :: validationJS"></script>
+<script th:replace="fragments.html :: ajax-csrf-header"></script>
+<script th:replace="fragments.html :: settingAccountJS"></script>
+</body>
+
+</html>
