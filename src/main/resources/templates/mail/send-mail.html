@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>빈카모</title>
+</head>
+<body>
+<div>
+  <p>안녕하세요. <span th:text="${nickname}"></span>님</p>
+  <h2 th:text="${message}">메시지</h2>
+  <div>
+    <form th:action="${host + link}" method="post">
+      <input type="hidden" name="email" th:value="${email}">
+      <input type="hidden" name="token" th:value="${token}">
+      <button type="submit" th:text="${linkName}">이메일 인증 확인 부탁드립니다.</button>
+    </form>
+  </div>
+</div>
+<footer>
+  <small>빈카모&copy; 2024</small>
+</footer>
+</body>
+</html>

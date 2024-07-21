@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+    <div th:replace="fragments.html :: mainNav"></div>
+
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+
+            <div class="col-2">
+                <div th:replace="fragments.html :: settings-side-menu (currentMenu='profile')"></div>
+            </div>
+
+
+            <div class="col-8">
+
+                <div th:if="${message}" class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${message}">메시지</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                <div class="row">
+                    <h2 class="col-sm-12" th:text="${account.nickname}">공존</h2>
+                </div>
+
+                <div class="row mt-3">
+                    <form class="col-sm-6" id="profileForm" th:action="@{/users/profile}" th:object="${profile}"
+                          action="javascript:void(0);" method="post" novalidate>
+                        <div class="form-group">
+                            <label for="bio">한 줄 소개</label>
+                            <input id="bio" type="text" th:field="*{bio}" class="form-control"
+                                   placeholder="자기 소개를 해주세요." aria-describedby="bioHelp" required>
+                            <small id="bioHelp" class="form-text text-muted">
+                                35자 이내로 입력하세요.
+                            </small>
+                            <small class="form-text text-danger" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}">
+                                조금 길어요.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="url">링크</label>
+                            <input id="url" type="url" th:field="*{url}" class="form-control"
+                                   placeholder="http://vincamo.com" aria-describedby="urlHelp" required>
+                            <small id="urlHelp" class="form-text text-muted">
+                                개인 블로그나 사진 사이트를 공유해주세요.
+                            </small>
+                            <small class="form-text text-danger" th:if="${#fields.hasErrors('url')}" th:errors="*{url}">
+                                옳바른 URL이 아닙니다. 예시처럼 입력해 주세요.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="occupation">직업</label>
+                            <input id="occupation" type="text" th:field="*{occupation}" class="form-control"
+                                   placeholder="무슨 일을 하고 계신가요?" aria-describedby="occupationHelp" required>
+                            <small id="occupationHelp" class="form-text text-muted">
+                                사진 작가?
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">활동 지역</label>
+                            <input id="location" type="text" th:field="*{location}" class="form-control"
+정                                   placeholder="서울, 수원, 인천, 어디든"
+                                   aria-describedby="locationdHelp" required>
+                            <small id="locationdHelp" class="form-text text-muted">
+                                주요 사진 활동을 하는 지역을 선택해주세요.
+                            </small>
+                        </div>
+
+
+                        <div class="form-group">
+                            <input id="profileImageUrl" type="hidden" th:field="*{profileImageUrl}" class="form-control" />
+                            <input id="profileImageName" type="hidden" th:field="*{profileImageName}" th:value="*{profileImageName}"  class="form-control"  />
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary btn-block" type="submit"
+                                    aria-describedby="submitHelp">수정하기</button>
+                        </div>
+                    </form>
+
+                    <div class="col-sm-6">
+                        <div class="card text-center">
+                            <div class="card-header">
+                                프로필 이미지
+                            </div>
+                            <div id="current-profile-image" class="mt-3">
+                                <svg th:if="${#strings.isEmpty(profile.profileImageUrl)}" class="rounded"
+                                     th:data-jdenticon-value="${account.nickname}" width="125" height="125"></svg>
+                                <img th:if="${!#strings.isEmpty(account.profileImageUrl)}" class="rounded"
+                                     th:src="@{'/uploaded-profile-images/' + ${account.profileImageUrl}}"
+                                     alt="Profile Image" th:alt="${account.nickname}" width="125" height="125"/>
+                            </div>
+                            <div id="new-profile-image" class="mt-3"></div>
+                            <div class="card-body">
+                                <div class="custom-file">
+                                    <label class="custom-file-label" for="profile-image-file">프로필 이미지 변경</label>
+                                    <input type="file" class="form-control" id="profile-image-file" th:field="*{profile.profileImageName}">
+                                </div>
+                                <div id="new-profile-image-control" class="mt-3 d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-block" id="cut-button">자르기</button>
+                                    <button class="btn btn-outline-success btn-block" id="confirm-button">확인</button>
+                                    <button class="btn btn-outline-warning btn-block" id="reset-button">취소</button>
+                                </div>
+                                <div id="cropped-new-profile-image" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <script th:replace="fragments.html :: ajax-csrf-header"></script>
+    <script th:replace="fragments.html :: profileJS"></script>
+    <link  href="/node_modules/cropper/dist/cropper.min.css" rel="stylesheet">
+    <script src="/node_modules/cropper/dist/cropper.min.js"></script>
+    <script src="/node_modules/jquery-cropper/dist/jquery-cropper.min.js"></script>
+    <script th:replace="fragments.html :: cropper-profile"></script>
+</body>
+</html>

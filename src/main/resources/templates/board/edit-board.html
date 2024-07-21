@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+<div th:replace="fragments.html :: mainNav"></div>
+
+<div class="container">
+  <div class="py-5 text-center">
+    <h2>게시글 수정</h2>
+  </div>
+  <div class="row justify-content-center">
+    <form id="boardForm" class="needs-validation col-sm-10" novalidate>
+      <input type="hidden" id="boardId" name="boardId" th:value="${board.id}">
+
+      <div class="form-group">
+        <label for="title">게시글 이름</label>
+        <input id="title" type="text" name="title" class="form-control"
+               th:value="${board.title}"
+               placeholder="게시글 이름" aria-describedby="titleHelp" required maxlength="50">
+        <small id="titleHelp" class="form-text text-muted">게시글 이름을 50자 이내로 입력하세요.</small>
+        <small class="invalid-feedback">게시글 이름을 입력하세요.</small>
+      </div>
+      <div class="form-group">
+        <label for="category">카테고리</label>
+        <select class="form-select" id="category" name="category" required>
+          <option value="" disabled>카테고리를 선택하세요</option>
+          <option value="GENERAL" th:selected="${board.boardCategory == 'GENERAL'}">자유 게시글</option>
+          <option value="CAMERA_SHOWCASE" th:selected="${board.boardCategory == 'CAMERA_SHOWCASE'}">카메라 자랑 게시글</option>
+          <option value="CAMERA_INFO" th:selected="${board.boardCategory == 'CAMERA_INFO'}">카메라 정보 게시글</option>
+        </select>
+        <small id="categoryHelp" class="form-text text-muted">게시글의 카테고리를 선택하세요.</small>
+        <small class="invalid-feedback">카테고리를 선택하세요.</small>
+      </div>
+      <div class="form-group">
+        <label for="fullDescription">게시글 소개</label>
+        <textarea id="fullDescription" name="fullDescription" class="editor form-control"
+                  placeholder="게시글을 내용을 작성해주세요" aria-describedby="fullDescriptionHelp" required>
+          <span th:text="${board.fullDescription}"></span>
+        </textarea>
+        <small id="fullDescriptionHelp" class="form-text text-muted">자유롭게 게시글을 작성해주세요.</small>
+        <small class="invalid-feedback">게시글 본문을 작성해주세요.</small>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block" type="submit">게시글 수정하기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script th:replace="fragments.html :: ajax-csrf-header"></script>
+<script th:replace="fragments.html :: editBoardJS"></script>
+
+</body>
+</html>

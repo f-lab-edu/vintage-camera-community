@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+<div th:replace="fragments.html :: mainNav"></div>
+
+<div class="container">
+  <div class="row mt-5 justify-content-center">
+        <div class="col-2">
+          <div th:replace="fragments.html :: settings-side-menu(currentMenu='cameraLocations')"></div>
+        </div>
+        <div class="col-8">
+          <div class="row">
+            <h2 class="col-sm-12" >활동하는 지역</h2>
+          </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        평소 활동하는 지역을 입력하거나 지도를 클릭하여 추가해주세요.
+                    </div>
+                    <input id="cameraLocationTags" type="text" class="tagify-outside form-control" aria-describedby="tagHelp"/>
+                    <div id="map" style="width:100%;height:400px;margin-top:15px;"></div>
+                </div>
+            </div>
+
+        </div>
+
+  </div>
+</div>
+
+<script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
+<script th:replace="fragments.html :: ajax-csrf-header"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=cac2183ce67dcfaae27daa001a26169d&libraries=services"></script>
+
+
+<script type="application/javascript">
+    $(function () {
+        function tagRequest(url, title) {
+
+            let methodType = "POST";
+
+            if(url === "/remove"){
+                methodType = "DELETE";
+            }
+
+            $.ajax({
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                method: methodType,
+                url: "/api/users/me/location-tags",
+                data: JSON.stringify({'title': title})
+            }).done(function (data, status) {
+                console.log(data + " and status is " + status);
+            });
+        }
+
+        function onAdd(e) {
+            tagRequest("/add", e.detail.data.value);
+        }
+
+        function onRemove(e) {
+            tagRequest("/remove", e.detail.data.value);
+        }
+
+        var tagInput = document.querySelector("#cameraLocationTags");
+        var tagify = new Tagify(tagInput, {
+            pattern: /^.{0,20}$/,
+            dropdown: {
+                enabled: 1,
+            }
+        });
+
+        // Get initial tags from the server
+        $.get("/api/users/me/location-tags", function (response) {
+            if (response.code === 1) {
+                var data = response.data;
+                tagify.addTags(data);
+            } else {
+                console.error("지역 태그를 불러오는데 실패했습니다.");
+            }
+        });
+
+        tagify.on("add", onAdd);
+        tagify.on("remove", onRemove);
+
+        tagify.DOM.input.classList.add('form-control');
+        tagify.DOM.scope.parentNode.insertBefore(tagify.DOM.input, tagify.DOM.scope);
+
+        // Kakao Map 설정
+        var mapContainer = document.getElementById('map');
+        var mapOption = {
+            center: new kakao.maps.LatLng(37.5665, 126.9780), // 지도의 중심 좌표
+            level: 3 // 지도의 확대 레벨
+        };
+        var map = new kakao.maps.Map(mapContainer, mapOption);
+
+        // 장소 검색 객체 생성
+        var ps = new kakao.maps.services.Places();
+
+        // 장소 검색 결과 표시
+        function displayPlaces(data) {
+            var listEl = document.getElementById('placesList');
+            var bounds = new kakao.maps.LatLngBounds();
+            for (var i = 0; i < data.length; i++) {
+                var placePosition = new kakao.maps.LatLng(data[i].y, data[i].x),
+                    marker = addMarker(placePosition, i);
+                bounds.extend(placePosition);
+
+                // 마커와 검색결과 항목에 클릭 이벤트를 등록
+                (function (marker, title) {
+                    kakao.maps.event.addListener(marker, 'click', function () {
+                        addTag(title);
+                    });
+                })(marker, data[i].place_name);
+            }
+            map.setBounds(bounds);
+        }
+
+        // 검색 결과 목록과 마커를 생성하고 표시
+        function searchPlaces() {
+            var keyword = document.getElementById('cameraLocationTags').value;
+
+            if (!keyword.replace(/^\s+|\s+$/g, '')) {
+                alert('키워드를 입력해주세요!');
+                return false;
+            }
+
+            // 장소검색 객체를 통해 키워드로 장소검색을 요청
+            ps.keywordSearch(keyword, function (data, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    displayPlaces(data);
+                } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                    alert('검색 결과가 존재하지 않습니다.');
+                } else if (status === kakao.maps.services.Status.ERROR) {
+                    alert('검색 결과 중 오류가 발생했습니다.');
+                }
+            });
+        }
+
+        // 마커를 생성하고 지도 위에 표시
+        function addMarker(position, idx, title) {
+            var marker = new kakao.maps.Marker({
+                position: position
+            });
+
+            marker.setMap(map); // 지도 위에 마커를 표시
+            return marker;
+        }
+
+        // 태그 추가 함수
+        function addTag(title) {
+            var tagInfo = {
+                value: title
+            };
+            tagify.addTags([tagInfo]);
+        }
+
+        // 입력 필드에서 장소 검색
+        tagInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                searchPlaces();
+            }
+        });
+
+        // 지도를 클릭하면 태그 추가
+        kakao.maps.event.addListener(map, 'click', function (mouseEvent) {
+            var latlng = mouseEvent.latLng;
+            var geocoder = new kakao.maps.services.Geocoder();
+
+            geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var address = result[0].address.address_name;
+                    addTag(address);
+                }
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

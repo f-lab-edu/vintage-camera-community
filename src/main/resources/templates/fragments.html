@@ -7,9 +7,36 @@
     <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome-free/css/all.css">
     <link rel="shortcut icon" href="#">
     <link th:href="@{/css/bootstrap/bootstrap-social.css}"  rel="stylesheet" />
+    <link rel="stylesheet" href="/node_modules/@yaireo/tagify/dist/tagify.css">
+    <link rel="stylesheet" href="/node_modules/summernote/dist/summernote-bs4.min.css">
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/node_modules/jdenticon/dist/jdenticon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+
+
+    <style>
+        .tagify--outside{
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
+        body,
+        input,
+        button,
+        select,
+        optgroup,
+        textarea,
+        .tooltip,
+        .popover {
+            font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+    </style>
 </head>
 
 
@@ -40,23 +67,27 @@
                     </a>
                 </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link btn btn-outline-primary" th:href="@{/notifications}">
+                    <a class="nav-link" th:href="@{/board/list}">전체 게시글</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link btn btn-outline-primary" th:href="@{/general}">
                         <i class="fa fa-plus" aria-hidden="true"></i>게시글 글 쓰기</a>
                 </li>
                 <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg data-jdenticon-value="user127" th:data-jdenticon-value="${#authentication.name}"
-                             width="24" height="24" class="rounded border bg-light">
-                        </svg>
+                        <svg th:if="${#strings.isEmpty(account?.profileImageUrl)}" th:data-jdenticon-value="${#authentication.name}"
+                             width="24" height="24" class="rounded border bg-light"></svg>
+                        <img th:if="${!#strings.isEmpty(account?.profileImageUrl)}" th:src="@{'/uploaded-profile-images/' + ${account.profileImageUrl}}"
+                             width="24" height="24" class="rounded border"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-sm-right" aria-labelledby="userDropdown">
                         <h6 class="dropdown-header">
                             <span sec:authentication="name">Username</span>
                         </h6>
-                        <a class="dropdown-item" th:href="@{'/profile/' + ${#authentication.name}}">프로필</a>
-                        <a class="dropdown-item">게시글</a>
+                        <a class="dropdown-item" th:href="@{'/users/personalProfile/' + ${#authentication.name}}">프로필</a>
+                        <a class="dropdown-item" >게시글</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" th:href="@{'/settings/profile'}">설정</a>
+                        <a class="dropdown-item" href="#" th:href="@{'/users/profile'}">설정</a>
                         <form class="form-inline my-2 my-lg-0" action="#" th:action="@{/logout}" method="post">
                             <button class="dropdown-item" type="submit">로그아웃</button>
                         </form>
@@ -79,7 +110,7 @@
 </script>
 
 
-<script type="application/javascript" th:fragment="accountJS">
+<script type="application/javascript" th:fragment="validationJS">
     (function () {
         'use strict';
 
@@ -97,7 +128,9 @@
             }
         }, false);
     }());
+</script>
 
+<script type="application/javascript" th:fragment="accountJS">
     document.addEventListener('DOMContentLoaded', function () {
         const signUpForm = document.querySelector('.signUp-Validation');
 
@@ -118,32 +151,29 @@
                     'X-CSRF-TOKEN': formData.get('_csrf')  // Ensure CSRF token is sent
                 }
             })
-                .then(response => response.json())
-                .then(data => {
+            .then(response => response.json())
+            .then(data => {
 
-                    if (data.code === 0 && data.data) {
-                        Object.keys(data.data).forEach(function (key) {
-                            const inputElement = document.getElementById(key);
-                            const errorElement = document.getElementById(key + 'Error');
-                            if (inputElement && errorElement) {
-                                errorElement.textContent = data.data[key];
-                                errorElement.style.display = 'block';
-                                inputElement.classList.add('is-invalid');
-                            }
-                        });
-                    } else {
-                        window.location.href = '/';  // Redirect on success
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+                if (data.code === 0 && data.data) {
+                    Object.keys(data.data).forEach(function (key) {
+                        const inputElement = document.getElementById(key);
+                        const errorElement = document.getElementById(key + 'Error');
+                        if (inputElement && errorElement) {
+                            errorElement.textContent = data.data[key];
+                            errorElement.style.display = 'block';
+                            inputElement.classList.add('is-invalid');
+                        }
+                    });
+                } else {
+                    window.location.href = '/';  // Redirect on success
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
     });
-
-
 </script>
 
 
-<!-- TODO 로컬 테스트할 때 주소로 직접 입력해서 들어오는 부분인데 생각 좀 해보기. -->
 <script th:fragment="emailTokenJS">
     $(document).ready(function() {
 
@@ -183,14 +213,52 @@
     });
 </script>
 
-<div th:fragment="settings-menu (currentMenu)" class="list-group">
-    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'profile'}? active" href="#" th:href="@{/settings/profile}">프로필</a>
-    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'password'}? active" href="#" th:href="@{/settings/password}">패스워드</a>
-    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'notifications'}? active" href="#" th:href="@{/settings/notifications}">알림</a>
-    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'tags'}? active" href="#" th:href="@{/settings/tags}">관심 카메라</a>
-    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'zones'}? active" href="#" th:href="@{/settings/zones}">활동 지역</a>
-    <a class="list-group-item list-group-item-action list-group-item-danger" th:classappend="${currentMenu == 'account'}? active" href="#" th:href="@{/settings/account}">계정</a>
-</div>
+
+<script th:fragment="passwordJS">
+    $(document).ready(function() {
+        $("#passwordForm").submit(function(event) {
+            event.preventDefault();
+
+            var newPassword = $('#newPassword').val();
+            var newPasswordConfirm = $('#newPasswordConfirm').val();
+
+            // 패스워드 확인 검사
+            if (newPassword !== newPasswordConfirm) {
+                $('#newPasswordConfirm').addClass('is-invalid');
+                return;
+            } else {
+                $('#newPasswordConfirm').removeClass('is-invalid');
+            }
+
+            var data = {
+                newPassword: newPassword,
+                newPasswordConfirm: newPasswordConfirm
+            };
+
+            $.ajax({
+                url: '/api/users/me/password',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.code === 1) {
+                        $('#newPassword').val('');
+                        $('#newPasswordConfirm').val('');
+                        displayMessage('패스워드가 성공적으로 변경되었습니다.', 'alert-success');
+                    }
+                },
+                error: function(response) {
+                    displayMessage(response.message, 'alert-danger');
+                }
+            });
+        });
+
+        function displayMessage(message, alertType) {
+            var responseDiv = $('#responseMessage');
+            responseDiv.text(message).removeClass('alert-success alert-danger').addClass(alertType).show();
+        }
+    });
+</script>
 
 
 <script th:fragment="profileJS">
@@ -204,15 +272,16 @@
                 "url": $("#url").val(),
                 "occupation": $("#occupation").val(),
                 "location": $("#location").val(),
-                "profileImageUrl": $("#profileImageUrl").val()
+                "profileImageUrl": $("#profileImageUrl").val(),
+                "profileImageName": $("#profileImageName").val()
             };
 
             $.ajax({
-                url: '/api/settings/profile',
+                url: '/api/users/me/profile',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(formData),
-                success: function() {
+                success: function(response) {
                     if (response.code === 1) {
                         alert('프로필 업데이트에 성공했습니다.');
                         $("#bio").text(response.data.bio);
@@ -220,6 +289,7 @@
                         $("#occupation").text(response.data.occupation);
                         $("#location").text(response.data.location);
                         $("#profileImageUrl").attr("src", response.data.profileImageUrl);
+                        $("#profileImageName").attr("src", response.data.profileImageName);
                     } else {
                         alert('프로필 업데이트에 실패했습니다. 오류: ' + response.message);
                     }
@@ -239,5 +309,317 @@
         $(document).ajaxSend(function (e, xhr, options) {
             xhr.setRequestHeader(csrfHeader, csrfToken);
         });
+    });
+</script>
+
+
+<div th:fragment="settings-side-menu (currentMenu)" class="list-group">
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'profile'}? active" href="#" th:href="@{/users/profile}">프로필</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'password'}? active" href="#" th:href="@{/users/password}">패스워드</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'cameraTags'}? active" href="#" th:href="@{/users/cameraTags}">관심 카메라</a>
+    <a class="list-group-item list-group-item-action" th:classappend="${currentMenu == 'cameraLocations'}? active" href="#" th:href="@{/users/cameraLocationsTags}">활동 지역</a>
+    <a class="list-group-item list-group-item-action list-group-item-danger" th:classappend="${currentMenu == 'account'}? active" href="#" th:href="@{/users/account}">계정</a>
+</div>
+
+<script type="application/javascript" th:fragment="cropper-profile">
+    $(function() {
+        cropper = '';
+        const $profileForm = $('#profileForm');
+        let $confirmBtn = $("#confirm-button");
+        let $resetBtn = $("#reset-button");
+        let $cutBtn = $("#cut-button");
+        let $newProfileImage = $("#new-profile-image");
+        let $currentProfileImage = $("#current-profile-image");
+        let $resultImage = $("#cropped-new-profile-image");
+        let $profileImageUrl = $("#profileImageUrl");
+        let $profileImageName = $("#profileImageName");
+
+        $newProfileImage.hide();
+        $cutBtn.hide();
+        $resetBtn.hide();
+        $confirmBtn.hide();
+
+        $("#profile-image-file").change(function(e) {
+
+            if (e.target.files.length === 1) {
+                let file = e.target.files[0]; // 선택된 파일 가져오기
+                $profileImageName.val(file.name);
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    if (e.target.result) {
+                        if (!e.target.result.startsWith("data:image")) {
+                            alert("이미지 파일을 선택하세요.");
+                            return;
+                        }
+
+                        let img = document.createElement("img");
+                        img.id = 'new-profile';
+                        img.src = e.target.result;
+                        img.setAttribute('width', '100%');
+
+                        $newProfileImage.html(img);
+                        $newProfileImage.show();
+                        $currentProfileImage.hide();
+
+                        let $newImage = $(img);
+                        $newImage.cropper({aspectRatio: 1});
+                        cropper = $newImage.data('cropper');
+
+                        $cutBtn.show();
+                        $confirmBtn.hide();
+                        $resetBtn.show();
+                    }
+                };
+
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        $resetBtn.click(function() {
+            $currentProfileImage.show();
+            $newProfileImage.hide();
+            $resultImage.hide();
+            $resetBtn.hide();
+            $cutBtn.hide();
+            $confirmBtn.hide();
+            $profileImageUrl.val('');
+            $profileImageName.val('');
+        });
+
+        $cutBtn.click(function () {
+            let dataUrl = cropper.getCroppedCanvas().toDataURL();
+            let newImage = document.createElement("img");
+            newImage.id = "cropped-new-profile-image";
+            newImage.src = dataUrl;
+            newImage.width = 125;
+            $resultImage.html(newImage);
+            $resultImage.show();
+            $confirmBtn.show();
+
+            $confirmBtn.click(function () {
+                $newProfileImage.html(newImage);
+                $cutBtn.hide();
+                $confirmBtn.hide();
+                $profileImageUrl.val(dataUrl);
+            });
+        });
+
+        $profileForm.submit(function() {
+            console.log("Submitting with profileImageName:", $profileImageName.val()); // 제출 전에 파일 이름 확인
+        });
+
+    });
+</script>
+
+
+<script th:fragment="settingAccountJS">
+    $(document).ready(function() {
+        $("#nickNameForm").submit(function(event) {
+            event.preventDefault();
+            var nickName = $('#nickName').val();
+            console.log("Nickname:", nickName); // 값 확인 로그
+
+            var data = { nickName: nickName };
+
+            $.ajax({
+                url: '/api/users/me/nickname',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.code === 1) {
+                        alert(response.message);
+                        //$('#responseMessage').removeClass('alert-danger').addClass('alert-success').text(response.message).show();    //업뎃문구 노출
+                        //window.location.href = '/users/personalProfile/' + response.data.newNickname; // 서버로부터 새 닉네임을 받는 경우
+                        window.location.reload(); // 단순 페이지 새로고침
+                    } else {
+                        handleErrors(response);
+                    }
+                },
+                error: function(xhr) {
+                    handleErrors(JSON.parse(xhr.responseText));
+                }
+            });
+        });
+
+        function handleErrors(response) {
+            var errorMessage = response.message;        // 유효성 검사 실패 메시지
+            var detailMessage = response.data.nickName;  // 상세 오류 메시지
+
+
+            $('#responseMessage')
+            .removeClass('alert-success')
+            .addClass('alert-danger')
+            .text(errorMessage + ": " + detailMessage)  // 오류 메시지와 상세 메시지 결합
+            .show();
+
+            if (response.data && response.data.nickName) {
+                $('#nickname')
+                .addClass('is-invalid')
+                .next('.invalid-feedback')
+                .text(detailMessage)  // 상세 오류 메시지로 입력 필드 아래에 표시
+                .show();
+            }
+        }
+
+        // 입력란 변경 시 오류 메시지 및 하이라이트 제거
+        $('#nickname').change(function() {
+            $('#nickname').removeClass('is-invalid');
+            $('#nickname').next('.invalid-feedback').hide();
+            $('#responseMessage').hide();
+        });
+    });
+</script>
+
+<div th:fragment="createBoardJS">
+    <script src="/node_modules/summernote/dist/summernote-bs4.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function() {
+
+            $('#fullDescription').summernote({
+                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Noto Sans KR', 'Merriweather'],
+                placeholder: '게시글 종류에 맞게 글을 작성해주세요.',
+                tabsize: 2,
+                height: 300
+            });
+
+            $('#boardForm').on('submit', function(event) {
+                event.preventDefault();
+
+                var isValid = true;
+
+                if (!$('#title').val()) {
+                    isValid = false;
+                    $('#title').addClass('is-invalid');
+                } else {
+                    $('#title').removeClass('is-invalid');
+                }
+
+                if (!$('#category').val()) {
+                    isValid = false;
+                    $('#category').addClass('is-invalid');
+                } else {
+                    $('#category').removeClass('is-invalid');
+                }
+
+                if (!$('#fullDescription').val()) {
+                    isValid = false;
+                    $('#fullDescription').addClass('is-invalid');
+                } else {
+                    $('#fullDescription').removeClass('is-invalid');
+                }
+
+                if (isValid) {
+                    var formData = {
+                        title: $('#title').val(),
+                        category: $('#category').val(),
+                        fullDescription: $('#fullDescription').val()
+                    };
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/board/general',
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData),
+                        success: function(response) {
+                            alert('게시글 등록에 성공했습니다.');
+                            window.location.href = '/post/'+ response.data.id;
+                        },
+                        error: function(response) {
+                            alert('게시글 등록에 실패했습니다.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</div>
+
+
+<div th:fragment="editBoardJS">
+    <script src="/node_modules/summernote/dist/summernote-bs4.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function() {
+            $('#fullDescription').summernote({
+                fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Noto Sans KR', 'Merriweather'],
+                placeholder: '게시글 종류에 맞게 글을 작성해주세요.',
+                tabsize: 2,
+                height: 300
+            });
+
+            $('#boardForm').on('submit', function(event) {
+                event.preventDefault();
+
+                var isValid = true;
+
+                if (!$('#title').val()) {
+                    isValid = false;
+                    $('#title').addClass('is-invalid');
+                } else {
+                    $('#title').removeClass('is-invalid');
+                }
+
+                if (!$('#category').val()) {
+                    isValid = false;
+                    $('#category').addClass('is-invalid');
+                } else {
+                    $('#category').removeClass('is-invalid');
+                }
+
+                if (!$('#fullDescription').val()) {
+                    isValid = false;
+                    $('#fullDescription').addClass('is-invalid');
+                } else {
+                    $('#fullDescription').removeClass('is-invalid');
+                }
+
+                if (isValid) {
+                    var formData = {
+                        title: $('#title').val(),
+                        category: $('#category').val(),
+                        fullDescription: $('#fullDescription').val()
+                    };
+
+                    var id = $('#boardId').val();
+
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/api/board/general/' + id,
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData),
+                        success: function(response) {
+                            alert('게시글 수정에 성공했습니다.');
+                            window.location.href = '/post/' + response.data.id;
+                        },
+                        error: function(response) {
+                            alert('게시글 수정에 실패했습니다.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</div>
+
+<script th:fragment="viewBoardJS">
+    document.getElementById("deleteButton").addEventListener("click", function() {
+        var id = $('#boardId').val();
+
+        if (confirm("정말로 삭제하시겠습니까?")) {
+            $.ajax({
+                url: '/api/board/general/' + id,
+                type: 'DELETE',
+                contentType: 'application/json',
+                success: function(response) {
+                    alert('게시글이 삭제되었습니다.');
+                    window.location.href = '/board/list';
+                },
+                error: function(response) {
+                    alert('게시글 삭제에 실패했습니다.');
+                }
+            });
+        }
+
     });
 </script>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+    <div th:replace="fragments.html :: mainNav"></div>
+
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+            <div class="col-2">
+
+                <svg th:if="${#strings.isEmpty(account.profileImageUrl)}" class="img-fluid float-left rounded img-thumbnail"
+                     th:data-jdenticon-value="${account.nickname}" width="125" height="125"></svg>
+                <img th:if="${!#strings.isEmpty(account.profileImageUrl)}" class="img-fluid float-left rounded img-thumbnail"
+                     th:src="@{'/uploaded-profile-images/' + ${account.profileImageUrl}}"
+                     width="125" height="125"/>
+            </div>
+
+            <div class="col-8">
+                <h1 class="display-4 " th:text="${account.nickname}">zerozone</h1>
+                <p class="lead" th:if="${!#strings.isEmpty(account.bio)}" th:text="${account.bio}">bio</p>
+                <p class="lead" th:if="${#strings.isEmpty(account.bio) && isOwner}">
+                    한 줄 소개를 넣어보세요.
+                </p>
+            </div>
+        </div>
+
+        <div class="row mt-3 justify-content-center">
+            <div class="col-2">
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link active" id="v-pills-intro-tab" data-bs-toggle="pill" href="#v-pills-profile"
+                       role="tab" aria-controls="v-pills-profile" aria-selected="true">소개</a>
+                    <a class="nav-link" id="v-pills-board-tab" data-bs-toggle="pill" href="#v-pills-board"
+                       role="tab" aria-controls="v-pills-board" aria-selected="false">게시글</a>
+                </div>
+            </div>
+
+            <div class="col-8">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                        <p th:if="${!#strings.isEmpty(account.url)}">
+                            <span style="font-size: 20px;">
+                                <i class="fa fa-link col-1"></i>
+                            </span>
+                            <span th:text="${account.url}" class="col-11"></span>
+                        </p>
+                        <p th:if="${!#strings.isEmpty(account.occupation)}">
+                            <span style="font-size: 20px;">
+                                <i class="fa fa-briefcase col-1"></i>
+                            </span>
+                            <span th:text="${account.occupation}" class="col-9"></span>
+                        </p>
+                        <p th:if="${!#strings.isEmpty(account.location)}">
+                            <span style="font-size: 20px;">
+                                <i class="fa fa-location-arrow col-1"></i>
+                            </span>
+                            <span th:text="${account.location}" class="col-9"></span>
+                        </p>
+                        <p th:if="${isOwner}">
+                            <span style="font-size: 20px;">
+                                <i class="fa fa-envelope-o col-1"></i>
+                            </span>
+                            <span th:text="${account.email}" class="col-9"></span>
+                        </p>
+                        <p th:if="${isOwner || account.emailVerified}">
+                            <span style="font-size: 20px;">
+                                <i class="fa fa-calendar-o col-1"></i>
+                            </span>
+                            <span th:if="${isOwner && !account.emailVerified}" class="col-9">
+                                <a href="#" th:href="@{'/check-email'}">가입을 완료하려면 이메일을 확인하세요.</a>
+                            </span>
+                            <span th:text="${#temporals.format(account.joinedAt, 'yyyy년 M월 가입')}" class="col-9"></span>
+                        </p>
+                        <div th:if="${isOwner}">
+                            <a class="btn btn-outline-primary" href="#" th:href="@{/users/profile}">프로필 수정</a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="v-pills-board" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                        Board
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<div th:replace="fragments.html :: head"></div>
+
+<body>
+<div th:replace="fragments.html :: mainNav"></div>
+
+<div class="container">
+  <div class="row mt-5 justify-content-center">
+        <div class="col-2">
+          <div th:replace="fragments.html :: settings-side-menu(currentMenu='cameraTags')"></div>
+        </div>
+        <div class="col-8">
+          <div class="row">
+            <h2 class="col-sm-12" >관심있는 카메라</h2>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="alert alert-info" role="alert">
+                평소 관심가는 카메라나 캠코더에 대해서 입력해주세요! 아니면 최애 카메라라도 좋습니다 :)
+              </div>
+                <input id="cameraTags" type="text" class="tagify-outside form-control" aria-describedby="tagHelp"/>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+<script src="/node_modules/@yaireo/tagify/dist/tagify.min.js"></script>
+<script th:replace="fragments.html :: ajax-csrf-header"></script>
+<script type="application/javascript">
+    $(function () {
+        function tagRequest(url, title) {
+            let methodType = "POST";
+
+            if(url === "/remove"){
+                methodType = "DELETE";
+            }
+
+            $.ajax({
+                dataType: "json",
+                autocomplete: {
+                    enabled: true,
+                    rightKey: true,
+                },
+                contentType: "application/json; charset=utf-8",
+                method: methodType,
+                url: "/api/users/me/camera-tags",
+                data: JSON.stringify({'title': title})
+            }).done(function (data, status) {
+                console.log(data + " and status is " + status);
+            });
+        }
+
+        function onAdd(e) {
+            tagRequest("/add", e.detail.data.value);
+        }
+
+        function onRemove(e) {
+            tagRequest("/remove", e.detail.data.value);
+        }
+        var tagInput = document.querySelector("#cameraTags");
+        var tagify = new Tagify(tagInput, {
+            pattern: /^.{0,20}$/,
+            dropdown : {
+                enabled: 1,
+            }
+        });
+
+        // Get initial tags from the server
+        $.get("/api/users/me/camera-tags", function (response) {
+            if (response.code === 1) {
+                var data = response.data;
+                tagify.addTags(data);
+            } else {
+                console.error("카메라 태그를 부르는데 실패했습니다.");
+            }
+        });
+
+        tagify.on("add", onAdd);
+        tagify.on("remove", onRemove);
+
+
+        tagify.DOM.input.classList.add('form-control');
+        tagify.DOM.scope.parentNode.insertBefore(tagify.DOM.input, tagify.DOM.scope);
+
+    });
+</script>
+</body>
+
+</html>
