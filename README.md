@@ -25,6 +25,12 @@
 - AWS EC2
 
 
+## 🗺️ 프로젝트 ERD 구성
+프로젝트의 ERD(Entity Relationship Diagram)는 다음과 같습니다:
+
+![ERD](./infoImage/vincamoERD.png)
+
+
 
 ## 🛠️ 로컬 환경에서 설치 및 실행 방법
 저장소를 클론합니다.
