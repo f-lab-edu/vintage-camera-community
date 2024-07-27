@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: vincamo
+      POSTGRES_USER: vincamouser
+      POSTGRES_PASSWORD: vincamo0126
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  app:
+    image: zero0zone/vintage:0.0.1
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vincamo
+      SPRING_DATASOURCE_USERNAME: vincamouser
+      SPRING_DATASOURCE_PASSWORD: vincamo0126
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+networks:
+  app-network:
