@@ -48,9 +48,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            echo "Start pulling Docker image at $(date)"
             docker pull zero0zone/vintage:${{ github.sha }}
+            echo "Finished pulling Docker image at $(date)"
             docker run -d -p 8081:8080 --name vintage-community-blue zero0zone/vintage:${{ github.sha }}
-          timeout: 300s
+          timeout: 900s
 
       - name: Health check for Blue environment
         uses: appleboy/ssh-action@v0.1.8
