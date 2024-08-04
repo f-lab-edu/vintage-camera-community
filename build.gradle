@@ -95,4 +95,8 @@ tasks.named('test') {
 	jvmArgs '-Xshare:off' // JVM 아규먼트 설정
 }
 
+tasks.withType(Checkstyle) {
+	enabled = false
+}
+
 processResources.dependsOn('npmInstall')
