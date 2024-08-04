@@ -32,6 +32,14 @@ jobs:
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push zero0zone/vintage:${{ github.sha }}
 
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.docker-cache
+          key: ${{ runner.os }}-docker-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
       - name: Deploy to Blue environment
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -42,6 +50,7 @@ jobs:
           script: |
             docker pull zero0zone/vintage:${{ github.sha }}
             docker run -d -p 8081:8080 --name vintage-community-blue zero0zone/vintage:${{ github.sha }}
+          timeout: 300s
 
       - name: Health check for Blue environment
         uses: appleboy/ssh-action@v0.1.8
