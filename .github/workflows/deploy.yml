@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Build Docker image
+        run: docker build -t vintage-community:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker tag vintage-community:${{ github.sha }} your-docker-repo/vintage-community:${{ github.sha }}
+          docker push your-docker-repo/vintage-community:${{ github.sha }}
+
+      - name: Deploy to Blue environment
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            docker pull your-docker-repo/vintage-community:${{ github.sha }}
+            docker run -d -p 8081:8080 --name vintage-community-blue your-docker-repo/vintage-community:${{ github.sha }}
+
+      - name: Health check for Blue environment
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            sleep 30
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081)" != "200" ]; then
+              echo "New version is not healthy, aborting deployment"
+              docker stop vintage-community-blue
+              docker rm vintage-community-blue
+              exit 1
+            fi
+
+      - name: Switch traffic to Blue
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            sudo sed -i 's/vintage-community-green/vintage-community-blue/' /etc/nginx/conf.d/default.conf
+            sudo service nginx reload
+
+      - name: Clean up Green environment
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            docker stop vintage-community-green || true
+            docker rm vintage-community-green || true
