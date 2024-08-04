@@ -29,9 +29,9 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag vintage-community:${{ github.sha }} your-docker-repo/vintage-community:${{ github.sha }}
-          docker push your-docker-repo/vintage-community:${{ github.sha }}
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }}
+          docker tag vintage-community:${{ github.sha }} zero0zone/vintage:${{ github.sha }}
+          docker push zero0zone/vintage:${{ github.sha }}
 
       - name: Deploy to Blue environment
         uses: appleboy/ssh-action@v0.1.8
@@ -41,8 +41,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            docker pull your-docker-repo/vintage-community:${{ github.sha }}
-            docker run -d -p 8081:8080 --name vintage-community-blue your-docker-repo/vintage-community:${{ github.sha }}
+            docker pull zero0zone/vintage:${{ github.sha }}
+            docker run -d -p 8081:8080 --name vintage-community-blue zero0zone/vintage:${{ github.sha }}
 
       - name: Health check for Blue environment
         uses: appleboy/ssh-action@v0.1.8
