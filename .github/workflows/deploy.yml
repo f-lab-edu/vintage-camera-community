@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # 수동 트리거 추가
 
 jobs:
   build:
@@ -17,7 +18,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'temurin'  # distribution 파라미터 추가
+          distribution: 'temurin'
 
       - name: Build with Gradle
         run: ./gradlew build
