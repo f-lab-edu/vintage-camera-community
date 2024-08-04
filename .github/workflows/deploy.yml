@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'temurin'  # distribution 파라미터 추가
 
       - name: Build with Gradle
         run: ./gradlew build
