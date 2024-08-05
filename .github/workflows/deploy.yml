@@ -26,12 +26,12 @@ jobs:
 
       - name: Build Docker image
         run: |
-          SHORT_SHA=${{ github.sha::7 }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           docker build -t zero0zone/vintage:$SHORT_SHA .
 
       - name: Push Docker image
         run: |
-          SHORT_SHA=${{ github.sha::7 }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push zero0zone/vintage:$SHORT_SHA
 
@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.docker-cache
-          key: ${{ runner.os }}-docker-${{ github.sha::7 }}
+          key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
 
@@ -68,7 +68,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            SHORT_SHA=${{ github.sha::7 }}
+            SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
             TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             echo "Start pulling Docker image at $(date)"
             docker pull zero0zone/vintage:$SHORT_SHA
