@@ -25,22 +25,26 @@ jobs:
         run: ./gradlew build
 
       - name: Build Docker image
-        run: docker build -t zero0zone/vintage:${{ github.sha }} .
+        run: |
+          SHORT_SHA=${{ github.sha::7 }}
+          docker build -t zero0zone/vintage:$SHORT_SHA .
 
       - name: Push Docker image
         run: |
+          SHORT_SHA=${{ github.sha::7 }}
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push zero0zone/vintage:${{ github.sha }}
+          docker push zero0zone/vintage:$SHORT_SHA
 
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
           path: /tmp/.docker-cache
-          key: ${{ runner.os }}-docker-${{ github.sha }}
+          key: ${{ runner.os }}-docker-${{ github.sha::7 }}
           restore-keys: |
             ${{ runner.os }}-docker-
 
-      - name: Deploy to Blue environment
+      - name: Determine active environment # 현재 활성화된 환경을 결정
+        id: determine-env
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,13 +52,31 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then 
+              echo "::set-output name=active_env::blue"
+              echo "::set-output name=target_env::green"
+            else
+              echo "::set-output name=active_env::green"
+              echo "::set-output name=target_env::blue"
+            fi
+
+      - name: Deploy to target environment
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            SHORT_SHA=${{ github.sha::7 }}
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             echo "Start pulling Docker image at $(date)"
-            docker pull zero0zone/vintage:${{ github.sha }}
+            docker pull zero0zone/vintage:$SHORT_SHA
             echo "Finished pulling Docker image at $(date)"
-            docker run -d -p 8081:8080 --name vintage-community-blue zero0zone/vintage:${{ github.sha }}
+            docker run -d -p 8081:8080 --name vintage-community-$TARGET_ENV zero0zone/vintage:$SHORT_SHA
           timeout: 900s
 
-      - name: Health check for Blue environment
+      - name: Health check for target environment
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,14 +85,16 @@ jobs:
           port: 22
           script: |
             sleep 30
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081)" != "200" ]; then
               echo "New version is not healthy, aborting deployment"
-              docker stop vintage-community-blue
-              docker rm vintage-community-blue
+              docker stop vintage-community-$TARGET_ENV
+              docker rm vintage-community-$TARGET_ENV
               exit 1
             fi
 
-      - name: Switch traffic to Blue
+      - name: Switch traffic to target environment
+        if: success()
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -78,10 +102,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            sudo sed -i 's/8080/8081/' /etc/nginx/conf.d/default.conf
+            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
+            sudo sed -i "s/vintage-community-$ACTIVE_ENV/vintage-community-$TARGET_ENV/" /etc/nginx/conf.d/default.conf
             sudo service nginx reload
 
-      - name: Clean up Green environment
+      - name: Clean up inactive environment
+        if: success()
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -89,5 +116,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            docker stop vintage-community-green || true
-            docker rm vintage-community-green || true
+            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
+            docker stop vintage-community-$ACTIVE_ENV || true
+            docker rm vintage-community-$ACTIVE_ENV || true
