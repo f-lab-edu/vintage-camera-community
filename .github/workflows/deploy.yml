@@ -86,7 +86,12 @@ jobs:
           script: |
             sleep 30
             TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
-            if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081)" != "200" ]; then
+            if [ "$TARGET_ENV" == "blue" ]; then
+              TARGET_PORT=8081
+            else
+              TARGET_PORT=8082
+            fi
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$TARGET_PORT)" != "200" ]; then
               echo "New version is not healthy, aborting deployment"
               docker stop vintage-community-$TARGET_ENV
               docker rm vintage-community-$TARGET_ENV
