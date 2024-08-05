@@ -53,11 +53,11 @@ jobs:
           port: 22
           script: |
             if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then 
-              echo "::set-output name=active_env::blue"
-              echo "::set-output name=target_env::green"
+              echo "active_env=blue" >> $GITHUB_ENV
+              echo "target_env=green" >> $GITHUB_ENV
             else
-              echo "::set-output name=active_env::green"
-              echo "::set-output name=target_env::blue"
+              echo "active_env=green" >> $GITHUB_ENV
+              echo "target_env=blue" >> $GITHUB_ENV
             fi
 
       - name: Deploy to target environment
@@ -69,7 +69,6 @@ jobs:
           port: 22
           script: |
             SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             echo "Start pulling Docker image at $(date)"
             docker pull zero0zone/vintage:$SHORT_SHA
             echo "Finished pulling Docker image at $(date)"
@@ -85,7 +84,6 @@ jobs:
           port: 22
           script: |
             sleep 30
-            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             if [ "$TARGET_ENV" == "blue" ]; then
               TARGET_PORT=8081
             else
@@ -98,7 +96,7 @@ jobs:
               exit 1
             fi
 
-      - name: Switch traffic to target environment
+      - name: Switch traffic to target environment  # 트래픽을 타겟 환경으로 전환
         if: success()
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -107,12 +105,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
-            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             sudo sed -i "s/vintage-community-$ACTIVE_ENV/vintage-community-$TARGET_ENV/" /etc/nginx/conf.d/default.conf
             sudo service nginx reload
 
-      - name: Clean up inactive environment
+      - name: Clean up inactive environment  # 비활성 환경 정리
         if: success()
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -121,6 +117,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
             docker stop vintage-community-$ACTIVE_ENV || true
             docker rm vintage-community-$ACTIVE_ENV || true
