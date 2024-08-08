@@ -45,16 +45,16 @@ jobs:
           port: 22
           script: |
             if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then 
-              echo "::set-output name=active_env::blue"
-              echo "::set-output name=target_env::green"
+              echo "ACTIVE_ENV=blue"
+              echo "TARGET_ENV=green"
             else
-              echo "::set-output name=active_env::green"
-              echo "::set-output name=target_env::blue"
+              echo "ACTIVE_ENV=green"
+              echo "TARGET_ENV=blue"
             fi
-            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
-            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
-            echo "Active2 environment is $ACTIVE_ENV"
-            echo "Target2 environment is $TARGET_ENV"
+            echo "ACTIVE_ENV is $ACTIVE_ENV"
+            echo "TARGET_ENV is $TARGET_ENV"
+            echo "::set-output name=active_env::$ACTIVE_ENV"
+            echo "::set-output name=target_env::$TARGET_ENV"
 
       - name: Deploy to target environment
         uses: appleboy/ssh-action@v0.1.8
@@ -70,11 +70,10 @@ jobs:
             docker pull zero0zone/vintage:$SHORT_SHA
             echo "Finished pulling Docker image at $(date)"
             docker run -d -p 8081:8080 --name vintage-community-$TARGET_ENV zero0zone/vintage:$SHORT_SHA
-            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
-            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
-            echo "Active2 environment is $ACTIVE_ENV"
-            echo "Target2 environment is $TARGET_ENV"
-          timeout: 900s
+            echo "ACTIVE_ENV is $ACTIVE_ENV"
+            echo "TARGET_ENV is $TARGET_ENV"
+            echo "::set-output name=active_env::$ACTIVE_ENV"
+            echo "::set-output name=target_env::$TARGET_ENV"
 
       - name: Health check for target environment
         uses: appleboy/ssh-action@v0.1.8
@@ -97,10 +96,10 @@ jobs:
               docker rm vintage-community-$TARGET_ENV
               exit 1
             fi
-            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
-            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
-            echo "Active2 environment is $ACTIVE_ENV"
-            echo "Target2 environment is $TARGET_ENV"
+            echo "ACTIVE_ENV is $ACTIVE_ENV"
+            echo "TARGET_ENV is $TARGET_ENV"
+            echo "::set-output name=active_env::$ACTIVE_ENV"
+            echo "::set-output name=target_env::$TARGET_ENV"
 
       - name: Switch traffic to target environment  # 트래픽을 타겟 환경으로 전환
         if: success()
@@ -115,10 +114,10 @@ jobs:
             TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             sudo sed -i "s/vintage-community-$ACTIVE_ENV/vintage-community-$TARGET_ENV/" /etc/nginx/conf.d/default.conf
             sudo service nginx reload
-            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
-            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
-            echo "Active2 environment is $ACTIVE_ENV"
-            echo "Target2 environment is $TARGET_ENV"
+            echo "ACTIVE_ENV is $ACTIVE_ENV"
+            echo "TARGET_ENV is $TARGET_ENV"
+            echo "::set-output name=active_env::$ACTIVE_ENV"
+            echo "::set-output name=target_env::$TARGET_ENV"
 
       - name: Clean up inactive environment  # 비활성 환경 정리
         if: success()
@@ -132,7 +131,7 @@ jobs:
             ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
             docker stop vintage-community-$ACTIVE_ENV || true
             docker rm vintage-community-$ACTIVE_ENV || true
-            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
-            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
-            echo "Active2 environment is $ACTIVE_ENV"
-            echo "Target2 environment is $TARGET_ENV"
+            echo "ACTIVE_ENV is $ACTIVE_ENV"
+            echo "TARGET_ENV is $TARGET_ENV"
+            echo "::set-output name=active_env::$ACTIVE_ENV"
+            echo "::set-output name=target_env::$TARGET_ENV"
