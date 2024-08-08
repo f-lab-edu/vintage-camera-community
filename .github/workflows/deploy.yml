@@ -35,14 +35,6 @@ jobs:
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push zero0zone/vintage:$SHORT_SHA
 
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.docker-cache
-          key: ${{ runner.os }}-docker-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
       - name: Determine active environment # 현재 활성화된 환경을 결정
         id: determine-env
         uses: appleboy/ssh-action@v0.1.8
@@ -53,12 +45,16 @@ jobs:
           port: 22
           script: |
             if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then 
-              echo "active_env=blue" >> $GITHUB_ENV
-              echo "target_env=green" >> $GITHUB_ENV
+              echo "::set-output name=active_env::blue"
+              echo "::set-output name=target_env::green"
             else
-              echo "active_env=green" >> $GITHUB_ENV
-              echo "target_env=blue" >> $GITHUB_ENV
+              echo "::set-output name=active_env::green"
+              echo "::set-output name=target_env::blue"
             fi
+            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
+            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
+            echo "Active2 environment is $ACTIVE_ENV"
+            echo "Target2 environment is $TARGET_ENV"
 
       - name: Deploy to target environment
         uses: appleboy/ssh-action@v0.1.8
@@ -69,10 +65,15 @@ jobs:
           port: 22
           script: |
             SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             echo "Start pulling Docker image at $(date)"
             docker pull zero0zone/vintage:$SHORT_SHA
             echo "Finished pulling Docker image at $(date)"
             docker run -d -p 8081:8080 --name vintage-community-$TARGET_ENV zero0zone/vintage:$SHORT_SHA
+            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
+            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
+            echo "Active2 environment is $ACTIVE_ENV"
+            echo "Target2 environment is $TARGET_ENV"
           timeout: 900s
 
       - name: Health check for target environment
@@ -84,10 +85,11 @@ jobs:
           port: 22
           script: |
             sleep 30
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             if [ "$TARGET_ENV" == "blue" ]; then
               TARGET_PORT=8081
             else
-              TARGET_PORT=8082
+              TARGET_PORT=8080
             fi
             if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$TARGET_PORT)" != "200" ]; then
               echo "New version is not healthy, aborting deployment"
@@ -95,6 +97,10 @@ jobs:
               docker rm vintage-community-$TARGET_ENV
               exit 1
             fi
+            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
+            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
+            echo "Active2 environment is $ACTIVE_ENV"
+            echo "Target2 environment is $TARGET_ENV"
 
       - name: Switch traffic to target environment  # 트래픽을 타겟 환경으로 전환
         if: success()
@@ -105,8 +111,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
+            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
             sudo sed -i "s/vintage-community-$ACTIVE_ENV/vintage-community-$TARGET_ENV/" /etc/nginx/conf.d/default.conf
             sudo service nginx reload
+            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
+            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
+            echo "Active2 environment is $ACTIVE_ENV"
+            echo "Target2 environment is $TARGET_ENV"
 
       - name: Clean up inactive environment  # 비활성 환경 정리
         if: success()
@@ -117,5 +129,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
             docker stop vintage-community-$ACTIVE_ENV || true
             docker rm vintage-community-$ACTIVE_ENV || true
+            echo "Active1 environment is ${{ steps.determine-env.outputs.active_env }}"
+            echo "Target1 environment is ${{ steps.determine-env.outputs.target_env }}"
+            echo "Active2 environment is $ACTIVE_ENV"
+            echo "Target2 environment is $TARGET_ENV"

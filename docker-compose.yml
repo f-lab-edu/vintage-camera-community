@@ -13,7 +13,7 @@ services:
       - app-network
 
   app:
-    image: zero0zone/vintage:0.0.1
+    image: zero0zone/vintage:latest # 최신 이미지 사용
     depends_on:
       - db
     environment:
