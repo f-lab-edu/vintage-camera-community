@@ -45,11 +45,11 @@ jobs:
           port: 22
           script: |
             if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then 
-              echo "ACTIVE_ENV=blue"
-              echo "TARGET_ENV=green"
+              export ACTIVE_ENV=blue
+              export TARGET_ENV=green
             else
-              echo "ACTIVE_ENV=green"
-              echo "TARGET_ENV=blue"
+              export ACTIVE_ENV=green
+              export TARGET_ENV=blue
             fi
             echo "ACTIVE_ENV is $ACTIVE_ENV"
             echo "TARGET_ENV is $TARGET_ENV"
