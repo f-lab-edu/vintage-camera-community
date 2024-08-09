@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   db:
+    container_name: vintage-community-db
     image: postgres:14
     environment:
       POSTGRES_DB: vincamo
@@ -13,11 +14,12 @@ services:
       - app-network
 
   app:
+    container_name: vintage-community-blue
     image: zero0zone/vintage:latest # 최신 이미지 사용
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/vincamo
+      SPRING_DATASOURCE_URL: jdbc:postgresql://vintage-community-db:5432/vincamo
       SPRING_DATASOURCE_USERNAME: vincamouser
       SPRING_DATASOURCE_PASSWORD: vincamo0126
     ports:
