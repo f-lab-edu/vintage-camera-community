@@ -13,9 +13,9 @@ services:
     networks:
       - app-network
 
-  app:
+  app-blue:
     container_name: vintage-community-blue
-    image: zero0zone/vintage:latest # 최신 이미지 사용
+    image: zero0zone/vintage:latest
     depends_on:
       - db
     environment:
@@ -24,6 +24,20 @@ services:
       SPRING_DATASOURCE_PASSWORD: vincamo0126
     ports:
       - "8080:8080"
+    networks:
+      - app-network
+
+  app-green:
+    container_name: vintage-community-green
+    image: zero0zone/vintage:latest
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://vintage-community-db:5432/vincamo
+      SPRING_DATASOURCE_USERNAME: vincamouser
+      SPRING_DATASOURCE_PASSWORD: vincamo0126
+    ports:
+      - "8081:8080"
     networks:
       - app-network
 
