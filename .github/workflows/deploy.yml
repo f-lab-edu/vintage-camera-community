@@ -75,6 +75,12 @@ jobs:
             else
             TARGET_PORT=8080
             fi
+            
+            # 기존 컨테이너 중지 및 삭제
+            docker stop vintage-community-$TARGET_ENV || true
+            docker rm vintage-community-$TARGET_ENV || true
+
+            # 새 컨테이너 실행
             docker pull zero0zone/vintage:$SHORT_SHA
             docker run -d -p $TARGET_PORT:8080 --name vintage-community-$TARGET_ENV zero0zone/vintage:$SHORT_SHA
 
