@@ -96,7 +96,11 @@ tasks.named('test') {
 }
 
 tasks.withType(Checkstyle) {
-	enabled = false
+	onlyIf {
+		// 'runCheckstyle'이라는 환경 변수가 true인 경우에만 Checkstyle을 실행
+		project.hasProperty('runCheckstyle') && project.property('runCheckstyle') == 'true'
+	}
 }
+
 
 processResources.dependsOn('npmInstall')
