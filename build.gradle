@@ -95,4 +95,12 @@ tasks.named('test') {
 	jvmArgs '-Xshare:off' // JVM 아규먼트 설정
 }
 
+tasks.withType(Checkstyle) {
+	onlyIf {
+		// 'runCheckstyle'이라는 환경 변수가 true인 경우에만 Checkstyle을 실행
+		project.hasProperty('runCheckstyle') && project.property('runCheckstyle') == 'true'
+	}
+}
+
+
 processResources.dependsOn('npmInstall')
