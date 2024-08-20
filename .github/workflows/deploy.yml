@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - feature/23    # 임시 추가
+      - feature/24    # 임시 추가
+      - feature/25    # 임시 추가
   workflow_dispatch:  # 수동 트리거 추가
 
 jobs:
