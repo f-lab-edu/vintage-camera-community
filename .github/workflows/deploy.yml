@@ -63,15 +63,12 @@ jobs:
           port: 22
           script: |
             if sudo grep -q 'vintage-community-blue' /etc/nginx/conf.d/default.conf; then
-              echo "ACTIVE_ENV=blue" >> $GITHUB_ENV
-              echo "TARGET_ENV=green" >> $GITHUB_ENV
+              echo "::set-output name=ACTIVE_ENV::blue"
+              echo "::set-output name=TARGET_ENV::green"
             else
-              echo "ACTIVE_ENV=green" >> $GITHUB_ENV
-              echo "TARGET_ENV=blue" >> $GITHUB_ENV
+              echo "::set-output name=ACTIVE_ENV::green"
+              echo "::set-output name=TARGET_ENV::blue"
             fi
-          run: |
-            echo "Active environment: ${{ env.ACTIVE_ENV }}"
-            echo "Target environment: ${{ env.TARGET_ENV }}"
 
       # 9. 새 버전을 타겟 환경에 배포 (Docker Compose를 사용하여 배포)
       - name: Deploy with Docker Compose
@@ -83,18 +80,19 @@ jobs:
           port: 22
           script: |
             SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+            TARGET_ENV="${{ steps.determine-env.outputs.TARGET_ENV }}"
             echo "Deploying to $TARGET_ENV using image $SHORT_SHA"
             
             # 기존 타겟 컨테이너 중지 및 제거
-            docker-compose stop vintage-community-${{ env.TARGET_ENV }} || true
-            docker-compose rm -f vintage-community-${{ env.TARGET_ENV }} || true
+            docker-compose stop vintage-community-$TARGET_ENV || true
+            docker-compose rm -f vintage-community-$TARGET_ENV || true
             
             # docker-compose.yml에서 이미지 태그 업데이트
             sudo sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" /home/ec2-user/vintage-camera-community/docker-compose.yml
             
             # Docker Compose로 새로운 환경 띄우기
             cd /home/ec2-user/vintage-camera-community
-            docker-compose up -d --no-deps vintage-community-${{ env.TARGET_ENV }}
+            docker-compose up -d --no-deps vintage-community-$TARGET_ENV
             
             echo "Deployment to $TARGET_ENV completed"
 
@@ -107,6 +105,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            TARGET_ENV="${{ steps.determine-env.outputs.TARGET_ENV }}"
             echo "Starting health check for $TARGET_ENV"
             TARGET_PORT=8080
             if [ "$TARGET_ENV" == "green" ]; then
@@ -142,6 +141,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            ACTIVE_ENV="${{ steps.determine-env.outputs.ACTIVE_ENV }}"
+            TARGET_ENV="${{ steps.determine-env.outputs.TARGET_ENV }}"
             echo "Switching traffic from $ACTIVE_ENV to $TARGET_ENV"
             sudo sed -i "s/vintage-community-$ACTIVE_ENV/vintage-community-$TARGET_ENV/" /etc/nginx/conf.d/default.conf
             sudo service nginx reload
@@ -157,6 +158,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            ACTIVE_ENV="${{ steps.determine-env.outputs.ACTIVE_ENV }}"
             echo "Cleaning up $ACTIVE_ENV environment"
             docker-compose stop vintage-community-$ACTIVE_ENV || true
             docker-compose rm -f vintage-community-$ACTIVE_ENV || true
