@@ -70,8 +70,8 @@ jobs:
               export TARGET_ENV=blue
             fi
 
-      # 9. 새 버전을 타겟 환경에 배포 (타겟 환경에 새로 빌드한 Docker 이미지를 배포)
-      - name: Deploy to target environment
+      # 9. 새 버전을 타겟 환경에 배포 (Docker Compose를 사용하여 배포)
+      - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -80,21 +80,15 @@ jobs:
           port: 22
           script: |
             SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-            ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
-            TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
-            if [ "$ACTIVE_ENV" == "blue" ]; then
-            TARGET_PORT=8081
-            else
-            TARGET_PORT=8080
-            fi
             
-            # 기존 컨테이너 중지 및 삭제
-            docker stop vintage-community-$TARGET_ENV || true
-            docker rm vintage-community-$TARGET_ENV || true
+            # docker-compose.yml에서 이미지 태그 업데이트
+            sudo sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" /home/ec2-user/vintage-camera-community/docker-compose.yml
+            
+            # Docker Compose로 배포
+            cd /home/ec2-user/vintage-camera-community
+            docker-compose down
+            docker-compose up -d
 
-            # 새 컨테이너 실행
-            docker pull zero0zone/vintage:$SHORT_SHA
-            docker run -d -p $TARGET_PORT:8080 --name vintage-community-$TARGET_ENV zero0zone/vintage:$SHORT_SHA
 
       # 10. 새로 배포된 환경의 헬스 체크 (배포된 환경이 정상적으로 동작하는지 확인)
       - name: Health check for target environment
