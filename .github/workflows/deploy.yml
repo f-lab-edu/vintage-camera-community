@@ -84,11 +84,9 @@ jobs:
             # docker-compose.yml에서 이미지 태그 업데이트
             sudo sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" /home/ec2-user/vintage-camera-community/docker-compose.yml
             
-            # Docker Compose로 배포
+            # Docker Compose로 새로운 환경 띄우기
             cd /home/ec2-user/vintage-camera-community
-            docker-compose down
-            docker-compose up -d
-
+            docker-compose up -d vintage-community-$TARGET_ENV
 
       # 10. 새로 배포된 환경의 헬스 체크 (배포된 환경이 정상적으로 동작하는지 확인)
       - name: Health check for target environment
@@ -121,8 +119,8 @@ jobs:
             done
             
             echo "Health check failed after $MAX_RETRIES attempts. Aborting deployment."  # 최대 재시도 횟수를 초과하면 배포 중지
-            docker stop vintage-community-$TARGET_ENV  # 실패한 컨테이너 중지
-            docker rm vintage-community-$TARGET_ENV    # 실패한 컨테이너 제거
+            docker-compose stop vintage-community-$TARGET_ENV  # 실패한 컨테이너 중지
+            docker-compose rm -f vintage-community-$TARGET_ENV  # 실패한 컨테이너 제거
             exit 1
 
       # 11. 트래픽을 새 환경으로 전환 (Nginx 설정 변경으로 트래픽을 새 환경으로 전환)
@@ -151,5 +149,5 @@ jobs:
           port: 22
           script: |
             ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
-            docker stop vintage-community-$ACTIVE_ENV || true
-            docker rm vintage-community-$ACTIVE_ENV || true
+            docker-compose stop vintage-community-$ACTIVE_ENV || true
+            docker-compose rm -f vintage-community-$ACTIVE_ENV || true
