@@ -83,16 +83,17 @@ jobs:
             TARGET_ENV="${{ steps.determine-env.outputs.TARGET_ENV }}"
             echo "Deploying to $TARGET_ENV using image $SHORT_SHA"
             
+            cd /home/ec2-user/vintage-camera-community
+            
             # 기존 타겟 컨테이너 중지 및 제거
-            docker-compose stop vintage-community-$TARGET_ENV || true
-            docker-compose rm -f vintage-community-$TARGET_ENV || true
+            docker-compose -f docker-compose.yml stop vintage-community-$TARGET_ENV || true
+            docker-compose -f docker-compose.yml rm -f vintage-community-$TARGET_ENV || true
             
             # docker-compose.yml에서 이미지 태그 업데이트
-            sudo sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" /home/ec2-user/vintage-camera-community/docker-compose.yml
+            sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" docker-compose.yml
             
             # Docker Compose로 새로운 환경 띄우기
-            cd /home/ec2-user/vintage-camera-community
-            docker-compose up -d --no-deps vintage-community-$TARGET_ENV
+            docker-compose -f docker-compose.yml up -d --no-deps vintage-community-$TARGET_ENV
             
             echo "Deployment to $TARGET_ENV completed"
 
@@ -127,8 +128,10 @@ jobs:
             done
             
             echo "Health check failed after $MAX_RETRIES attempts. Aborting deployment."  # 최대 재시도 횟수를 초과하면 배포 중지
-            docker-compose stop vintage-community-$TARGET_ENV  # 실패한 컨테이너 중지
-            docker-compose rm -f vintage-community-$TARGET_ENV  # 실패한 컨테이너 제거
+            cd /home/ec2-user/vintage-camera-community
+            docker-compose -f docker-compose.yml stop vintage-community-$TARGET_ENV  # 실패한 컨테이너 중지
+            docker-compose -f docker-compose.yml rm -f vintage-community-$TARGET_ENV  # 실패한 컨테이너 제거
+            docker-compose -f docker-compose.yml logs vintage-community-$TARGET_ENV  # 실패한 컨테이너의 로그 출력
             exit 1
 
       # 11. 트래픽을 새 환경으로 전환 (Nginx 설정 변경으로 트래픽을 새 환경으로 전환)
@@ -160,6 +163,7 @@ jobs:
           script: |
             ACTIVE_ENV="${{ steps.determine-env.outputs.ACTIVE_ENV }}"
             echo "Cleaning up $ACTIVE_ENV environment"
-            docker-compose stop vintage-community-$ACTIVE_ENV || true
-            docker-compose rm -f vintage-community-$ACTIVE_ENV || true
+            cd /home/ec2-user/vintage-camera-community
+            docker-compose -f docker-compose.yml stop vintage-community-$ACTIVE_ENV || true
+            docker-compose -f docker-compose.yml rm -f vintage-community-$ACTIVE_ENV || true
             echo "$ACTIVE_ENV environment cleaned up"
