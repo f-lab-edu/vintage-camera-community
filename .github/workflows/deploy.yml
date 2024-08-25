@@ -82,7 +82,11 @@ jobs:
             SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
             ACTIVE_ENV=${{ steps.determine-env.outputs.active_env }}
             TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
-
+            
+            # 기존 타겟 컨테이너 중지 및 제거
+            docker-compose stop vintage-community-$TARGET_ENV || true
+            docker-compose rm -f vintage-community-$TARGET_ENV || true
+            
             # docker-compose.yml에서 이미지 태그 업데이트
             sudo sed -i "s|image: zero0zone/vintage:.*|image: zero0zone/vintage:$SHORT_SHA|g" /home/ec2-user/vintage-camera-community/docker-compose.yml
             

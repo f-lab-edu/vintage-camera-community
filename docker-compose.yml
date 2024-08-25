@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
 
-  app-blue:
+  vintage-community-blue:
     container_name: vintage-community-blue
     image: zero0zone/vintage:latest
     depends_on:
@@ -27,7 +27,7 @@ services:
     networks:
       - app-network
 
-  app-green:
+  vintage-community-green:
     container_name: vintage-community-green
     image: zero0zone/vintage:latest
     depends_on:
