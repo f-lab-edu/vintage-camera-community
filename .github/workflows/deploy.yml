@@ -100,7 +100,11 @@ jobs:
           port: 22
           script: |
             TARGET_ENV=${{ steps.determine-env.outputs.target_env }}
-            TARGET_PORT=${{ steps.deploy.outputs.target_port }}
+            if [ "$TARGET_ENV" == "green" ]; then
+              TARGET_PORT=8081
+            else
+              TARGET_PORT=8080
+            fi
             
             MAX_RETRIES=30     # 최대 재시도 횟수 설정
             RETRY_INTERVAL=10  # 재시도 간격(초) 설정
