@@ -72,6 +72,9 @@ public class AccountService {
         context.setVariable("linkName", "이메일 인증 확인 부탁드립니다.");
         context.setVariable("message", "빈카모 이메일 인증을 위해서 이메일 확인 버튼을 눌러주세요!");
 
+        // 로그 추가
+        log.info("Loading template: mail/send-mail");
+
         String message = templateEngine.process("mail/send-mail", context);
 
         EmailMessage emailMessage = EmailMessage.builder()

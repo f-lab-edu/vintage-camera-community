@@ -28,9 +28,7 @@ public class SecurityConfig{
         return http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/account/email-verification", "POST"),
-                                                 new AntPathRequestMatcher("http://13.209.12.49:8080/**"),
-                                                 new AntPathRequestMatcher("http://13.209.12.49:8081/**")
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/account/email-verification", "POST")
                                                 )
                 )
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
