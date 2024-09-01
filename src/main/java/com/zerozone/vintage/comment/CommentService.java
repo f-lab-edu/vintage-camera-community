@@ -3,6 +3,7 @@ package com.zerozone.vintage.comment;
 import com.zerozone.vintage.board.BoardRepository;
 import com.zerozone.vintage.account.Account;
 import com.zerozone.vintage.board.Board;
+import com.zerozone.vintage.config.CustomMetrics;
 import com.zerozone.vintage.exception.CustomException;
 import com.zerozone.vintage.meeting.Meeting;
 import com.zerozone.vintage.meeting.MeetingRepository;
@@ -22,6 +23,8 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final MeetingRepository meetingRepository;
     private final NotificationService notificationService;
+    private final CustomMetrics customMetrics;
+
 
     public Comment createBoardComment(Long boardId, String content, Account account) {
         Board board = boardRepository.findById(boardId)
@@ -29,6 +32,7 @@ public class CommentService {
         Comment comment = saveComment(board, null, content, account);
 
         notificationService.createNotification(board.getAuthor(), account.getNickname() + "님이 게시글에 댓글을 달았습니다.");
+        customMetrics.incrementCommentAdded();
 
         return comment;
     }
@@ -39,6 +43,7 @@ public class CommentService {
         Comment comment = saveComment(null, meeting, content, account);
 
         notificationService.createNotification(meeting.getOrganizer(), account.getNickname() + "님이 모임에 댓글을 달았습니다.");
+        customMetrics.incrementCommentAdded();
 
         return comment;
     }
