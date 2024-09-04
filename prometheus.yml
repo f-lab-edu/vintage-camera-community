@@ -8,4 +8,4 @@ scrape_configs:
 
   - job_name: 'vintage-community-app'
     static_configs:
-      - targets: ['vintage-community-blue:8080', 'vintage-community-green:8081']
+      - targets: ['vintage-community-blue:8080', 'vintage-community-green:8080']
