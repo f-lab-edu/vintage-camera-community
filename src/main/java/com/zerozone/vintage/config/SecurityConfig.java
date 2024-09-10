@@ -7,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,10 +27,13 @@ public class SecurityConfig{
         return http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/account/email-verification", "POST")
-                                                )
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/account/email-verification", "POST"),
+                                                 new AntPathRequestMatcher("/actuator/**")
+                        )
                 )
                 .authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                        .requestMatchers("/actuator/prometheus", "/actuator/health").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                          .requestMatchers("/account", "/api/account/account", "/email-verification",
                                           "/checked-email", "/email-verification-success").permitAll()
                          .requestMatchers("/").permitAll()
@@ -40,7 +42,6 @@ public class SecurityConfig{
                                          "/swagger-resources/**", "/configuration/ui", "/configuration/security",
                                          "/swagger-ui/**", "/webjars/**", "/swagger-ui.html").permitAll()
                          .requestMatchers(GET, "/profile/*").permitAll()
-                         .requestMatchers("/actuator/**").permitAll()
                          .requestMatchers(HttpMethod.POST, "/api/account/email-verification").permitAll()
                         .anyRequest().authenticated() // 그외는 로그인 해야만 접근 가능
                 )
@@ -54,6 +55,7 @@ public class SecurityConfig{
         return (web) -> web.ignoring()
                 .requestMatchers("/node_modules/**")
                 .requestMatchers("/uploaded-profile-images/**")
+                .requestMatchers("/actuator/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 

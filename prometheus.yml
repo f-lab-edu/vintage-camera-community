@@ -7,5 +7,7 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   - job_name: 'vintage-community-app'
+    metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['vintage-community-blue:8080', 'vintage-community-green:8080']
+    honor_labels: true
