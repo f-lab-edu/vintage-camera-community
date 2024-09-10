@@ -74,8 +74,23 @@ public class AccountService {
 
         // 로그 추가
         log.info("Loading template: mail/send-mail");
-
         String message = templateEngine.process("mail/send-mail", context);
+
+        /*
+        // HTML 내용을 직접 작성.
+        String message = "<div>" +
+                "<p>안녕하세요. " + newAccount.getNickname() + "님</p>" +
+                "<h2>이메일 인증 확인 부탁드립니다.</h2>" +
+                "<div>" +
+                "<form action=\"" + appProperties.getHost() + "/api/account/email-verification\" method=\"post\">" +
+                "<input type=\"hidden\" name=\"email\" value=\"" + newAccount.getEmail() + "\">" +
+                "<input type=\"hidden\" name=\"token\" value=\"" + newAccount.getEmailCheckToken() + "\">" +
+                "<button type=\"submit\">이메일 인증 확인 부탁드립니다.</button>" +
+                "</form>" +
+                "</div>" +
+                "</div>" +
+                "<footer><small>빈카모&copy; 2024</small></footer>";
+          */
 
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(newAccount.getEmail())

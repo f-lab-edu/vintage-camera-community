@@ -45,26 +45,26 @@ public class UserController {
     public String showUpdatePasswordForm(@CheckedUser Account account, Model model){
         model.addAttribute(account);
         model.addAttribute(new PasswordForm());
-        return "/user/password";
+        return "user/password";
     }
 
     @GetMapping("/account")
     public String showUpdateAccountForm(@CheckedUser Account account, Model model) {
         model.addAttribute(account);
         model.addAttribute(modelMapper.map(account, NicknameForm.class));
-        return "/user/account";
+        return "user/account";
     }
 
     @GetMapping("/cameraTags")
     public String showUpdateCameraTags(@CheckedUser Account account, Model model) {
         model.addAttribute(account);
-        return "/user/cameraTags";
+        return "user/cameraTags";
     }
 
     @GetMapping("/cameraLocationsTags")
     public String showUpdateCameraLocations(@CheckedUser Account account, Model model) {
         model.addAttribute(account);
-        return "/user/cameraLocations";
+        return "user/cameraLocations";
     }
 
 }
