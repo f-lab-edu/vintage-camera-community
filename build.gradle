@@ -62,6 +62,9 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
 
+	// Spring Boot Starter JDBC
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
 	// LomBok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -87,6 +90,10 @@ dependencies {
 
 	//Stomp chat
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	//prometheus
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 
 }
 

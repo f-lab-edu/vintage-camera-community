@@ -14,6 +14,7 @@
   - 동시에 여러 사용자가 좋아요를 누를 때 발생할 수 있는 문제를 방지하기 위해 비관적 락 추가
   - 게시글 검색 성능 개선을 위한 인덱스 기능 추가
 - **STOMP를 이용한 실시간 채팅 구현**
+- **Prometheus 및 Grafana를 이용한 모니터링 및 성능 분석**
 
 ## 🚀 프로젝트 사용기술
 - Java
@@ -23,6 +24,8 @@
 - Thymeleaf
 - JUnit5
 - AWS EC2
+- Prometheus 
+- Grafana
 
 
 ## 🗺️ 프로젝트 ERD 구성
@@ -30,6 +33,8 @@
 
 ![ERD](./infoImage/vincamoERD.png)
 
+## 🌐 환경 구축 구성
+![environment_setup](./infoImage/Project_environment_setup_image.png)
 
 
 ## 🛠️ 로컬 환경에서 설치 및 실행 방법
