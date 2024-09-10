@@ -21,6 +21,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://vintage-community-db:5432/vincamo
       SPRING_DATASOURCE_USERNAME: vincamouser
       SPRING_DATASOURCE_PASSWORD: vincamo0126
+      SPRING_PROFILES_ACTIVE: dev,email
     ports:
       - "8080:8080"
     networks:
@@ -36,6 +37,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://vintage-community-db:5432/vincamo
       SPRING_DATASOURCE_USERNAME: vincamouser
       SPRING_DATASOURCE_PASSWORD: vincamo0126
+      SPRING_PROFILES_ACTIVE: dev,email
     ports:
       - "8081:8080"
     networks:
